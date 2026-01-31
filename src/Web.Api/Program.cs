@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using Serilog;
 using Web.Api.Behaviors;
+using Web.Api.ExceptionHandlers;
 using Web.Api.Extensions;
 
 // ===================================================================
@@ -45,6 +46,9 @@ try
     // FluentValidation
     builder.Services.AddValidatorsFromAssembly(typeof(Program).Assembly);
 
+    // 例外ハンドラー（順序が重要！）
+    builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
     // Carter（Minimal API拡張）
     builder.Services.AddCarter();
 
@@ -52,7 +56,6 @@ try
 
     // ミドルウェアパイプライン（順序が重要）
     app.UseSerilogRequestLogging();  // HTTPリクエストロギング
-    app.UseGlobalExceptionHandler();    // グローバル例外ハンドリング
 
     if (app.Environment.IsDevelopment())
     {
@@ -69,6 +72,9 @@ try
     }
 
     app.UseHttpsRedirection();
+
+    // 例外ハンドリング
+    app.UseExceptionHandler();
 
     // エンドポイント登録
     app.MapCarter();
