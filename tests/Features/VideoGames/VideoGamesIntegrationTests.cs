@@ -1,8 +1,8 @@
-﻿using FluentAssertions;
+﻿using Application.Features.VideoGames;
+using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
 using System.Net;
 using System.Net.Http.Json;
-using Web.Api.Features.VideoGames;
 
 namespace VideoGameApiVsa.Tests.Features.VideoGames;
 

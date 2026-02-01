@@ -1,7 +1,7 @@
 ﻿using Infrastructure.Database;
 using MediatR;
 
-namespace Web.Api.Features.VideoGames;
+namespace Application.Features.VideoGames;
 
 /// <summary>
 /// 「ゲーム削除」機能の垂直スライス

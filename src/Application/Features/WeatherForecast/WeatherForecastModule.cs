@@ -1,6 +1,6 @@
 ﻿using Carter;
 
-namespace Web.Api.Features.WeatherForecast;
+namespace Application.Features.WeatherForecast;
 
 /// <summary>
 /// WeatherForecast機能のエンドポイント定義モジュール

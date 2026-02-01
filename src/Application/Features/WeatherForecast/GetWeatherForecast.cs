@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace Web.Api.Features.WeatherForecast;
+namespace Application.Features.WeatherForecast;
 
 /// <summary>
 /// 「天気予報取得」機能の垂直スライス

@@ -2,8 +2,9 @@
 using FluentValidation;
 using Infrastructure.Database;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 
-namespace Web.Api.Features.VideoGames;
+namespace Application.Features.VideoGames;
 
 /// <summary>
 /// 「ゲーム作成」機能の垂直スライス

@@ -1,8 +1,8 @@
+using Application.Features.VideoGames;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using VideoGameApiVsa.Entities;
 using Web.Api.Data;
-using Web.Api.Features.VideoGames;
 
 namespace VideoGameApiVsa.Tests.Features.VideoGames;
 

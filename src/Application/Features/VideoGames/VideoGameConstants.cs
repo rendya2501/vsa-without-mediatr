@@ -1,4 +1,4 @@
-﻿namespace Web.Api.Features.VideoGames;
+﻿namespace Application.Features.VideoGames;
 
 /// <summary>
 /// VideoGames機能のすべての定数定義

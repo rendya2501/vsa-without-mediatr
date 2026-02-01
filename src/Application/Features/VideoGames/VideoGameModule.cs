@@ -1,6 +1,9 @@
 ﻿using Carter;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
 
-namespace Web.Api.Features.VideoGames;
+namespace Application.Features.VideoGames;
 
 /// <summary>
 /// Video Gamesに関連するすべてのエンドポイントを管理するモジュール

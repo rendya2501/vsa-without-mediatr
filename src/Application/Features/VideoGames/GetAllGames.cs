@@ -2,7 +2,7 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace Web.Api.Features.VideoGames;
+namespace Application.Features.VideoGames;
 
 /// <summary>
 /// 「ゲーム一覧取得」機能の垂直スライス
