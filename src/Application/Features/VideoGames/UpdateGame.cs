@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using Infrastructure.Database;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 
 namespace Application.Features.VideoGames;
 

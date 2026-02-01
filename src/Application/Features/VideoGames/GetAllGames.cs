@@ -1,5 +1,6 @@
 ﻿using Infrastructure.Database;
 using MediatR;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace Application.Features.VideoGames;
