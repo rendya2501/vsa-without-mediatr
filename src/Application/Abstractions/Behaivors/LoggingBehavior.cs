@@ -1,7 +1,8 @@
 ﻿using MediatR;
+using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 
-namespace Web.Api.Behaviors;
+namespace Application.Abstractions.Behaivors;
 
 /// <summary>
 /// MediatR の Pipeline Behavior（Serilogロギング処理）

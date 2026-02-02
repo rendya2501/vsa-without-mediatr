@@ -1,4 +1,5 @@
-﻿using Carter;
+﻿using Application;
+using Carter;
 using FluentValidation;
 using Infrastructure.Database;
 using Infrastructure.Database.Seeding;
@@ -30,15 +31,18 @@ try
 
     builder.Services.AddOpenApi();
 
+    builder.Services
+        .AddApplication();
+
     // DbContext（In-Memory Database）
     builder.Services.AddDbContext<VideoGameDbContext>(options =>
         options.UseInMemoryDatabase("GameDB"));
     // DBシーダー登録
     builder.Services.AddScoped<IDbSeeder, VideoGameDbSeeder>();
 
-    // MediatR（CQRS）
-    builder.Services.AddMediatR(cfg =>
-        cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
+    //// MediatR（CQRS）
+    //builder.Services.AddMediatR(cfg =>
+    //    cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
     // MediatR Pipeline Behaviors（実行順序: 登録順）
     builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
     builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
@@ -48,6 +52,7 @@ try
 
     // 例外ハンドラー（順序が重要！）
     builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+    builder.Services.AddProblemDetails();
 
     // Carter（Minimal API拡張）
     builder.Services.AddCarter();
