@@ -20,9 +20,9 @@ public sealed class GetWeatherForecastEndpoint : ICarterModule
         // GET 5日間の天気予報を取得
         app.MapGet("api/weather-forecast-self-maid/", async (
             IQueryHandler<WeatherForecastQuery, IEnumerable<WeatherForecastResponse>> handler,
-            CancellationToken ct) =>
+            CancellationToken cancellationToken) =>
         {
-            var result = await handler.Handle(new WeatherForecastQuery(), ct);
+            var result = await handler.Handle(new WeatherForecastQuery(), cancellationToken);
             return Results.Ok(result);
         })
         .WithTags("WithoutMediatR")

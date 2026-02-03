@@ -16,9 +16,9 @@ public sealed class GetGameByIdEndpoint2 : ICarterModule
             .MapGet("/{id:int}", async (
                 int id,
                 IQueryHandler<GetGameByIdQuery, GetGameByIdResponse?> handler,
-                CancellationToken ct) =>
+                CancellationToken cancellationToken) =>
             {
-                var result = await handler.Handle(new GetGameByIdQuery(id), ct);
+                var result = await handler.Handle(new GetGameByIdQuery(id), cancellationToken);
 
                 if (result is null)
                 {

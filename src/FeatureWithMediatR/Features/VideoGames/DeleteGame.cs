@@ -40,11 +40,11 @@ public static class DeleteGame
         /// ゲーム削除処理を実行
         /// </summary>
         /// <param name="command">削除コマンド</param>
-        /// <param name="ct">キャンセルトークン</param>
+        /// <param name="cancellationToken">キャンセルトークン</param>
         /// <returns>削除成功時true、対象不在時false</returns>
-        public async Task<bool> Handle(DeleteGameCommand command, CancellationToken ct)
+        public async Task<bool> Handle(DeleteGameCommand command, CancellationToken cancellationToken)
         {
-            var videoGame = await dbContext.VideoGames.FindAsync([command.Id], ct);
+            var videoGame = await dbContext.VideoGames.FindAsync([command.Id], cancellationToken);
 
             if (videoGame is null)
             {
@@ -52,7 +52,7 @@ public static class DeleteGame
             }
 
             dbContext.VideoGames.Remove(videoGame);
-            await dbContext.SaveChangesAsync(ct);
+            await dbContext.SaveChangesAsync(cancellationToken);
 
             return true;
         }
@@ -63,14 +63,14 @@ public static class DeleteGame
     /// </summary>
     /// <param name="sender">MediatR送信インターフェース</param>
     /// <param name="id">削除対象のゲームID（ルートパラメータ）</param>
-    /// <param name="ct">キャンセルトークン</param>
+    /// <param name="cancellationToken">キャンセルトークン</param>
     /// <returns>HTTP 204 No Content または 404 Not Found</returns>
     /// <remarks>
     /// RESTful設計に従い、削除成功時はボディなしの204を返却。
     /// </remarks>
-    public static async Task<IResult> Endpoint(ISender sender, int id, CancellationToken ct)
+    public static async Task<IResult> Endpoint(ISender sender, int id, CancellationToken cancellationToken)
     {
-        var deleted = await sender.Send(new DeleteGameCommand(id), ct);
+        var deleted = await sender.Send(new DeleteGameCommand(id), cancellationToken);
 
         if (deleted is false)
         {

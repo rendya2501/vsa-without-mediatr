@@ -18,9 +18,9 @@ public sealed class GetWeatherForecastEndpoint : ICarterModule
     public void AddRoutes(IEndpointRouteBuilder app)
     {
         // GET 5日間の天気予報を取得
-        app.MapGet("/api/weather-forecast-mediatr/", async (ISender sender, CancellationToken ct) =>
+        app.MapGet("/api/weather-forecast-mediatr/", async (ISender sender, CancellationToken cancellationToken) =>
         {
-            var result = await sender.Send(new WeatherForecastQuery(), ct);
+            var result = await sender.Send(new WeatherForecastQuery(), cancellationToken);
             return Results.Ok(result);
         })
         .WithTags("WithMediatR")

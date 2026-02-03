@@ -14,9 +14,9 @@ internal sealed class Handler(VideoGameDbContext dbContext)
     /// ゲーム作成処理を実行
     /// </summary>
     /// <param name="command">作成コマンド</param>
-    /// <param name="ct">キャンセルトークン</param>
+    /// <param name="cancellationToken">キャンセルトークン</param>
     /// <returns>作成されたゲーム情報</returns>
-    public async Task<CreateGameResponse> Handle(CreateGameCommand command, CancellationToken ct)
+    public async Task<CreateGameResponse> Handle(CreateGameCommand command, CancellationToken cancellationToken)
     {
         // Command → Entity への変換
         var videoGame = new VideoGame
@@ -28,7 +28,7 @@ internal sealed class Handler(VideoGameDbContext dbContext)
 
         // EF Core による永続化
         dbContext.VideoGames.Add(videoGame);
-        await dbContext.SaveChangesAsync(ct);
+        await dbContext.SaveChangesAsync(cancellationToken);
 
         // Entity → Response への変換
         return new CreateGameResponse(

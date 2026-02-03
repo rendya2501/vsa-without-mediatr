@@ -13,11 +13,11 @@ internal sealed class DeleteGameHandler(VideoGameDbContext dbContext)
     /// ゲーム削除処理を実行
     /// </summary>
     /// <param name="command">削除コマンド</param>
-    /// <param name="ct">キャンセルトークン</param>
+    /// <param name="cancellationToken">キャンセルトークン</param>
     /// <returns>削除成功時true、対象不在時false</returns>
-    public async Task<bool> Handle(DeleteGameCommand command, CancellationToken ct)
+    public async Task<bool> Handle(DeleteGameCommand command, CancellationToken cancellationToken)
     {
-        var videoGame = await dbContext.VideoGames.FindAsync([command.Id], ct);
+        var videoGame = await dbContext.VideoGames.FindAsync([command.Id], cancellationToken);
 
         if (videoGame is null)
         {
@@ -25,7 +25,7 @@ internal sealed class DeleteGameHandler(VideoGameDbContext dbContext)
         }
 
         dbContext.VideoGames.Remove(videoGame);
-        await dbContext.SaveChangesAsync(ct);
+        await dbContext.SaveChangesAsync(cancellationToken);
 
         return true;
     }

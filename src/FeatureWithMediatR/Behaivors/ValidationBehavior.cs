@@ -25,20 +25,20 @@ public class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TReq
     /// </summary>
     /// <param name="request">実際に送信された Command / Query</param>
     /// <param name="next">次の処理（次の Behavior or 最終的な Handler）</param>
-    /// <param name="ct">キャンセル用トークン（ほぼ素通し）</param>
+    /// <param name="cancellationToken">キャンセル用トークン（ほぼ素通し）</param>
     /// <returns></returns>
     /// <exception cref="ValidationException"></exception>
     public async Task<TResponse> Handle(
         TRequest request,
         RequestHandlerDelegate<TResponse> next,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
         //  配列化して1回だけ列挙
         var validatorArray = validators as IValidator<TRequest>[] ?? validators.ToArray();
 
         if (validatorArray.Length == 0)
         {
-            return await next(ct);
+            return await next(cancellationToken);
         }
 
         // FluentValidation 用の検証コンテキストを作成
@@ -46,7 +46,7 @@ public class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TReq
 
         // 各 Validator で検証を実行
         var results = await Task.WhenAll(
-            validators.Select(v => v.ValidateAsync(context, ct)));
+            validators.Select(v => v.ValidateAsync(context, cancellationToken)));
 
         // すべての Validator を実行し、エラーを平坦化してリスト化
         var failures = results
@@ -59,6 +59,6 @@ public class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TReq
             throw new ValidationException(failures);
         }
 
-        return await next(ct);
+        return await next(cancellationToken);
     }
 }

@@ -98,9 +98,9 @@ public static class CreateGame
         /// ゲーム作成処理を実行
         /// </summary>
         /// <param name="command">作成コマンド</param>
-        /// <param name="ct">キャンセルトークン</param>
+        /// <param name="cancellationToken">キャンセルトークン</param>
         /// <returns>作成されたゲーム情報</returns>
-        public async Task<CreateGameResponse> Handle(CreateGameCommand command, CancellationToken ct)
+        public async Task<CreateGameResponse> Handle(CreateGameCommand command, CancellationToken cancellationToken)
         {
             // Command → Entity への変換
             var videoGame = new VideoGame
@@ -112,7 +112,7 @@ public static class CreateGame
 
             // EF Core による永続化
             dbContext.VideoGames.Add(videoGame);
-            await dbContext.SaveChangesAsync(ct);
+            await dbContext.SaveChangesAsync(cancellationToken);
 
             // Entity → Response への変換
             return new CreateGameResponse(
@@ -129,13 +129,13 @@ public static class CreateGame
     /// </summary>
     /// <param name="sender">MediatR送信インターフェース</param>
     /// <param name="request">HTTPリクエストボディ</param>
-    /// <param name="ct">キャンセルトークン</param>
+    /// <param name="cancellationToken">キャンセルトークン</param>
     /// <returns>HTTP 201 Created + Location ヘッダ</returns>
     /// <remarks>
     /// Minimal API/Carterから呼び出される薄いレイヤー。
     /// HTTPの詳細を隠蔽し、CommandへのマッピングとMediatR呼び出しのみを担当。
     /// </remarks>
-    public static async Task<IResult> Endpoint(ISender sender, CreateGameRequest request, CancellationToken ct)
+    public static async Task<IResult> Endpoint(ISender sender, CreateGameRequest request, CancellationToken cancellationToken)
     {
         // 外部入力 DTO → 内部 Command へ変換
         var command = new CreateGameCommand(
@@ -145,7 +145,7 @@ public static class CreateGame
         );
 
         // MediatR 経由で処理を実行
-        var result = await sender.Send(command, ct);
+        var result = await sender.Send(command, cancellationToken);
 
         // 201 Created + Location ヘッダ付きレスポンス
         return Results.CreatedAtRoute(

@@ -16,9 +16,9 @@ public sealed class DeleteGameEndpoint2 : ICarterModule
             .MapDelete("/{id:int}", async (
                 int id,
                 ICommandHandler<DeleteGameCommand, bool> handler,
-                CancellationToken ct) =>
+                CancellationToken cancellationToken) =>
             {
-                var deleted = await handler.Handle(new DeleteGameCommand(id), ct);
+                var deleted = await handler.Handle(new DeleteGameCommand(id), cancellationToken);
 
                 if (deleted is false)
                 {

@@ -15,9 +15,9 @@ public sealed class GetAllGamesEndpoint2 : ICarterModule
         app.MapApiGroup("/api/games2", "WithoutMediatR")
             .MapGet("/", async (
                 IQueryHandler<GetAllGamesQuery, IEnumerable<GetAllGamesResponse>> handler,
-                CancellationToken ct) =>
+                CancellationToken cancellationToken) =>
             {
-                var result = await handler.Handle(new GetAllGamesQuery(), ct);
+                var result = await handler.Handle(new GetAllGamesQuery(), cancellationToken);
                 return Results.Ok(result);
             })
             .WithName(VideoGameConstants.RouteNames.GetAll)

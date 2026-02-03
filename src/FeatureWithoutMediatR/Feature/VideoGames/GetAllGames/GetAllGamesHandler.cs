@@ -14,15 +14,15 @@ internal sealed class GetAllGamesHandler(VideoGameDbContext dbContext)
     /// 全ゲーム情報を取得
     /// </summary>
     /// <param name="_">一覧取得クエリ</param>
-    /// <param name="ct">キャンセルトークン</param>
+    /// <param name="cancellationToken">キャンセルトークン</param>
     /// <returns>全ゲーム情報のコレクション</returns>
     /// <remarks>
     /// ToListAsync()により、データベースへの1回のクエリで全データを取得。
     /// その後、メモリ上でEntity→Response DTOへのマッピングを実行。
     /// </remarks>
-    public async Task<IEnumerable<GetAllGamesResponse>> Handle(GetAllGamesQuery _, CancellationToken ct)
+    public async Task<IEnumerable<GetAllGamesResponse>> Handle(GetAllGamesQuery _, CancellationToken cancellationToken)
     {
-        var videoGames = await dbContext.VideoGames.ToListAsync(ct);
+        var videoGames = await dbContext.VideoGames.ToListAsync(cancellationToken);
         return videoGames.Select(vg => new GetAllGamesResponse(vg.Id, vg.Title, vg.Genre, vg.ReleaseYear));
     }
 }

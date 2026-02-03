@@ -32,10 +32,10 @@ public sealed class UpdateGameEndpoint2 : ICarterModule
                 int id,
                 UpdateGameRequest request,
                 ICommandHandler<UpdateGameCommand, UpdateGameResponse?> handler,
-                CancellationToken ct) =>
+                CancellationToken cancellationToken) =>
             {
                 var command = new UpdateGameCommand(id, request.Title, request.Genre, request.ReleaseYear);
-                var result = await handler.Handle(command, ct);
+                var result = await handler.Handle(command, cancellationToken);
 
                 if (result is null)
                 {

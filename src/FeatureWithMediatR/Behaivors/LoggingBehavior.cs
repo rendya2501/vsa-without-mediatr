@@ -46,7 +46,7 @@ public class LoggingBehavior<TRequest, TResponse>(
     /// </summary>
     /// <param name="request">実際に送信された Command / Query</param>
     /// <param name="next">次の処理（次の Behavior or 最終的な Handler）</param>
-    /// <param name="ct">キャンセルトークン</param>
+    /// <param name="cancellationToken">キャンセルトークン</param>
     /// <returns>Handler からの Response</returns>
     /// <remarks>
     /// <para>
@@ -61,7 +61,7 @@ public class LoggingBehavior<TRequest, TResponse>(
     public async Task<TResponse> Handle(
         TRequest request,
         RequestHandlerDelegate<TResponse> next,
-        CancellationToken ct)
+        CancellationToken cancellationToken)
     {
         var requestName = typeof(TRequest).Name;
         var requestGuid = Guid.NewGuid().ToString("N")[..8]; // 短縮GUID (8文字)
@@ -83,7 +83,7 @@ public class LoggingBehavior<TRequest, TResponse>(
         try
         {
             // 次の処理を実行（ValidationBehavior → Handler）
-            response = await next(ct);
+            response = await next(cancellationToken);
 
             stopwatch.Stop();
 

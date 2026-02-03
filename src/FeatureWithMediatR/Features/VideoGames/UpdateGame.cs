@@ -103,15 +103,15 @@ public static class UpdateGame
         /// ゲーム更新処理を実行
         /// </summary>
         /// <param name="command">更新コマンド</param>
-        /// <param name="ct">キャンセルトークン</param>
+        /// <param name="cancellationToken">キャンセルトークン</param>
         /// <returns>更新後のゲーム情報、または対象不在時はnull</returns>
         /// <remarks>
         /// EF Coreの変更追跡により、プロパティ変更後のSaveChangesAsyncで
         /// 自動的にUPDATE文が発行される。
         /// </remarks>
-        public async Task<UpdateGameResponse?> Handle(UpdateGameCommand command, CancellationToken ct)
+        public async Task<UpdateGameResponse?> Handle(UpdateGameCommand command, CancellationToken cancellationToken)
         {
-            var videoGame = await dbContext.VideoGames.FindAsync([command.Id], ct);
+            var videoGame = await dbContext.VideoGames.FindAsync([command.Id], cancellationToken);
 
             if (videoGame is null)
             {
@@ -122,7 +122,7 @@ public static class UpdateGame
             videoGame.Genre = command.Genre;
             videoGame.ReleaseYear = command.ReleaseYear;
 
-            await dbContext.SaveChangesAsync(ct);
+            await dbContext.SaveChangesAsync(cancellationToken);
             return new UpdateGameResponse(videoGame.Id, videoGame.Title, videoGame.Genre, videoGame.ReleaseYear);
         }
     }
@@ -133,16 +133,16 @@ public static class UpdateGame
     /// <param name="sender">MediatR送信インターフェース</param>
     /// <param name="id">更新対象のゲームID（ルートパラメータ）</param>
     /// <param name="request">更新内容（HTTPリクエストボディ）</param>
-    /// <param name="ct">キャンセルトークン</param>
+    /// <param name="cancellationToken">キャンセルトークン</param>
     /// <returns>HTTP 200 OK + 更新後情報 または 404 Not Found</returns>
     /// <remarks>
     /// PUT /api/games/{id} の形式で呼び出される。
     /// ルートパラメータとボディを結合してCommandを生成。
     /// </remarks>
-    public static async Task<IResult> Endpoint(ISender sender, int id, UpdateGameRequest request, CancellationToken ct)
+    public static async Task<IResult> Endpoint(ISender sender, int id, UpdateGameRequest request, CancellationToken cancellationToken)
     {
         var command = new UpdateGameCommand(id, request.Title, request.Genre, request.ReleaseYear);
-        var result = await sender.Send(command , ct);
+        var result = await sender.Send(command , cancellationToken);
 
         if (result is null)
         {

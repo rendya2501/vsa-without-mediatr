@@ -36,7 +36,7 @@ public sealed class CreateGameEndpoint2 : ICarterModule
             .MapPost("/", async (
                 CreateGameRequest request,
                 ICommandHandler<CreateGameCommand, CreateGameResponse> handler,
-                CancellationToken ct) =>
+                CancellationToken cancellationToken) =>
             {
                 // 外部入力 DTO → 内部 Command へ変換
                 var command = new CreateGameCommand(
@@ -46,7 +46,7 @@ public sealed class CreateGameEndpoint2 : ICarterModule
                 );
 
                 // MediatR 経由で処理を実行
-                var result = await handler.Handle(command, ct);
+                var result = await handler.Handle(command, cancellationToken);
 
                 // 201 Created + Location ヘッダ付きレスポンス
                 return Results.CreatedAtRoute(

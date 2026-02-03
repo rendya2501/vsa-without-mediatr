@@ -38,9 +38,9 @@ internal sealed class GetWeatherForecastHandler
     /// 5日間の天気予報データを生成
     /// </summary>
     /// <param name="_">天気予報取得クエリ</param>
-    /// <param name="ct">キャンセルトークン（現在の実装では未使用）</param>
+    /// <param name="cancellationToken">キャンセルトークン（現在の実装では未使用）</param>
     /// <returns>5日分の天気予報データ</returns>
-    public Task<IEnumerable<WeatherForecastResponse>> Handle(WeatherForecastQuery _, CancellationToken ct)
+    public Task<IEnumerable<WeatherForecastResponse>> Handle(WeatherForecastQuery _, CancellationToken cancellationToken)
     {
         // 5日分の天気予報を生成
         var forecast = Enumerable.Range(1, 5).Select(index =>
