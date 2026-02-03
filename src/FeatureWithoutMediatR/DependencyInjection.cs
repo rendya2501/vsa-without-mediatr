@@ -9,16 +9,16 @@ public static class DependencyInjection
     public static IServiceCollection AddFeatureWithoutMediatR(this IServiceCollection services)
     {
         // 自動登録の例
-        services.Scan(scan => scan.FromAssembliesOf(typeof(DependencyInjection))
-            .AddClasses(classes => classes.AssignableTo(typeof(IQueryHandler<,>)), publicOnly: false)
-                .AsImplementedInterfaces()
-                .WithScopedLifetime()
-            .AddClasses(classes => classes.AssignableTo(typeof(ICommandHandler<>)), publicOnly: false)
-                .AsImplementedInterfaces()
-                .WithScopedLifetime()
-            .AddClasses(classes => classes.AssignableTo(typeof(ICommandHandler<,>)), publicOnly: false)
-                .AsImplementedInterfaces()
-                .WithScopedLifetime());
+        services.Scan(scan => scan
+            .FromAssembliesOf(typeof(DependencyInjection))
+            .AddClasses(classes => classes
+                .Where(type =>
+                    type.IsAssignableTo(typeof(IQueryHandler<,>)) ||
+                    type.IsAssignableTo(typeof(ICommandHandler<>)) ||
+                    type.IsAssignableTo(typeof(ICommandHandler<,>))),
+                publicOnly: false)
+            .AsImplementedInterfaces()
+            .WithScopedLifetime());
 
         // 手動登録の例
         // ハンドラーを追加する度にここに追記する必要があるため、自動登録を推奨
@@ -38,7 +38,7 @@ public static class DependencyInjection
         //    .AsImplementedInterfaces()
         //    .WithScopedLifetime());
 
-        
+
         services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly, includeInternalTypes: true);
 
         return services;
