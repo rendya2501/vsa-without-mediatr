@@ -63,8 +63,13 @@ public class LoggingBehavior<TRequest, TResponse>(
         RequestHandlerDelegate<TResponse> next,
         CancellationToken cancellationToken)
     {
+        // リクエスト名
         var requestName = typeof(TRequest).Name;
-        var requestGuid = Guid.NewGuid().ToString("N")[..8]; // 短縮GUID (8文字)
+        // 短縮GUID (8文字)                                                          
+        var requestGuid = Guid.NewGuid().ToString("N")[..8];
+        // 機密情報をマスク
+        var sanitizedRequest = SanitizeRequest(request);
+        // 処理時間を計測
         var stopwatch = Stopwatch.StartNew();
 
         // リクエスト開始ログ
@@ -75,7 +80,7 @@ public class LoggingBehavior<TRequest, TResponse>(
                 "Handling {RequestName} [{RequestGuid}] {@Request}",
                 requestName,
                 requestGuid,
-                request);
+                sanitizedRequest);
         }
 
         TResponse response;
@@ -117,5 +122,28 @@ public class LoggingBehavior<TRequest, TResponse>(
         }
 
         return response;
+    }
+
+    /// <summary>
+    /// リクエスト内容をマスク
+    /// </summary>
+    /// <param name="request">リクエスト</param>
+    /// <returns>マスクされたリクエスト内容</returns>
+    private static Dictionary<string, object?> SanitizeRequest(TRequest request)
+    {
+        // プロパティ名に "Password", "Secret", "Token" が含まれる場合はマスク
+        var properties = typeof(TRequest).GetProperties()
+            .Select(p => new
+            {
+                Name = p.Name,
+                Value = p.Name.Contains("Password", StringComparison.OrdinalIgnoreCase) ||
+                        p.Name.Contains("Secret", StringComparison.OrdinalIgnoreCase) ||
+                        p.Name.Contains("Token", StringComparison.OrdinalIgnoreCase)
+                    ? "***REDACTED***"
+                    : p.GetValue(request)
+            })
+            .ToDictionary(x => x.Name, x => x.Value);
+
+        return properties;
     }
 }
