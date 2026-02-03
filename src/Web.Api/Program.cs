@@ -50,7 +50,12 @@ try
     // DBシーダー登録
     builder.Services.AddScoped<IDbSeeder, VideoGameDbSeeder>();
 
+    // ===================================================================
     // 例外ハンドラー（順序が重要！）
+    // ===================================================================
+    // 特定の例外を先に登録
+    builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
+    // グローバルハンドラーを最後に登録
     builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
     builder.Services.AddProblemDetails();
 
