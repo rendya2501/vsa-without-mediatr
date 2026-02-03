@@ -33,25 +33,30 @@ public class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TReq
         RequestHandlerDelegate<TResponse> next,
         CancellationToken ct)
     {
-        if (validators.Any())
+        //  配列化して1回だけ列挙
+        var validatorArray = validators as IValidator<TRequest>[] ?? validators.ToArray();
+
+        if (validatorArray.Length == 0)
         {
-            // FluentValidation 用の検証コンテキストを作成
-            var context = new ValidationContext<TRequest>(request);
+            return await next(ct);
+        }
 
-            // 各 Validator で検証を実行
-            var results = await Task.WhenAll(
-                validators.Select(v => v.ValidateAsync(context, ct)));
+        // FluentValidation 用の検証コンテキストを作成
+        var context = new ValidationContext<TRequest>(request);
 
-            // すべての Validator を実行し、エラーを平坦化してリスト化
-            var failures = results
-                .SelectMany(r => r.Errors)          // 各 ValidationResult の Errors を 1 つの列にまとめる
-                .ToList();
+        // 各 Validator で検証を実行
+        var results = await Task.WhenAll(
+            validators.Select(v => v.ValidateAsync(context, ct)));
 
-            // 1 件でもエラーがあれば Handler を呼ばずに例外を投げる
-            if (failures.Count != 0)
-            {
-                throw new ValidationException(failures);
-            }
+        // すべての Validator を実行し、エラーを平坦化してリスト化
+        var failures = results
+            .SelectMany(r => r.Errors)          // 各 ValidationResult の Errors を 1 つの列にまとめる
+            .ToList();
+
+        // 1 件でもエラーがあれば Handler を呼ばずに例外を投げる
+        if (failures.Count != 0)
+        {
+            throw new ValidationException(failures);
         }
 
         return await next(ct);
