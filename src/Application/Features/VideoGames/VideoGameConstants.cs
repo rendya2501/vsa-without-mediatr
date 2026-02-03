@@ -1,4 +1,4 @@
-﻿namespace Application.Features.VideoGames;
+﻿namespace FeatureWithMediatR.Features.VideoGames;
 
 /// <summary>
 /// VideoGames機能のすべての定数定義

@@ -1,13 +1,12 @@
-﻿using Application.Abstractions.Behaivors;
-using Application.Abstractions.Messaging;
+﻿using FeatureWithMediatR.Behaivors;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Application;
+namespace FeatureWithMediatR;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddApplication(this IServiceCollection services)
+    public static IServiceCollection AddFeatureWithMediatR(this IServiceCollection services)
     {
         // MediatR の登録
         services.AddMediatR(config =>
@@ -21,42 +20,11 @@ public static class DependencyInjection
         });
 
         /// Pipeline Behaviors の手動登録の例
-        /// MediatR v12以降、`AddOpenBehavior` が公式に推奨されている方法だが、備忘録として残す
+        /// MediatR v12以降、`AddOpenBehavior` が公式に推奨されている方法だが、それを知らなかった時代の備忘録として残す
         //services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
         //services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
-
-        // 自動登録の例
-        services.Scan(scan => scan.FromAssembliesOf(typeof(DependencyInjection))
-            .AddClasses(classes => classes.AssignableTo(typeof(IQueryHandler<,>)), publicOnly: false)
-                .AsImplementedInterfaces()
-                .WithScopedLifetime()
-            .AddClasses(classes => classes.AssignableTo(typeof(ICommandHandler<>)), publicOnly: false)
-                .AsImplementedInterfaces()
-                .WithScopedLifetime()
-            .AddClasses(classes => classes.AssignableTo(typeof(ICommandHandler<,>)), publicOnly: false)
-                .AsImplementedInterfaces()
-                .WithScopedLifetime());
-
-        // 手動登録の例
-        // ハンドラーを追加する度にここに追記する必要があるため、自動登録を推奨
-        // services.AddScoped<IQueryHandler<WeatherForecastQuery, IEnumerable<WeatherForecastResponse>>, GetWeatherForecastHandler>();
-
-
-
-        //services.Decorate(typeof(ICommandHandler<,>), typeof(ValidationDecorator.CommandHandler<,>));
-        //services.Decorate(typeof(ICommandHandler<>), typeof(ValidationDecorator.CommandBaseHandler<>));
-
-        //services.Decorate(typeof(IQueryHandler<,>), typeof(LoggingDecorator.QueryHandler<,>));
-        //services.Decorate(typeof(ICommandHandler<,>), typeof(LoggingDecorator.CommandHandler<,>));
-        //services.Decorate(typeof(ICommandHandler<>), typeof(LoggingDecorator.CommandBaseHandler<>));
-
-        //services.Scan(scan => scan.FromAssembliesOf(typeof(DependencyInjection))
-        //    .AddClasses(classes => classes.AssignableTo(typeof(IDomainEventHandler<>)), publicOnly: false)
-        //    .AsImplementedInterfaces()
-        //    .WithScopedLifetime());
-
-
+        // FluentValidation の登録
         services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly, includeInternalTypes: true);
 
         return services;

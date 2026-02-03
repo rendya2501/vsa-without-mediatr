@@ -1,9 +1,11 @@
-using Application.Features.VideoGames;
+using FeatureWithMediatR.Features.VideoGames;
+using FeatureWithoutMediatR.Constants;
+using FeatureWithoutMediatR.Feature.VideoGames.CreateGame;
 using FluentAssertions;
+using Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
-using Web.Api.Data;
 
-namespace VideoGameApiVsa.Tests.Features.VideoGames;
+namespace Tests.Features.VideoGames;
 
 /// <summary>
 /// CreateGame機能のテストクラス

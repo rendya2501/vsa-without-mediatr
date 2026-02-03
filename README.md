@@ -560,3 +560,6 @@ services.AddDbContext<VideoGameDbContext>(options =>
 - [Build a CRUD App with Vertical Slice Architecture in .NET 9](https://youtu.be/dnvi0B76ekg?si=nV0QWSmQTjlQeQ8H)
 - [The Cleanest .NET Web API with Vertical Slice Architecture is here!](https://youtu.be/1jYh3j9bGxA?si=U7MWXHkqQ1Kf0b0N)
 - [How to Protect Your .NET API with FluentValidation (The Right Way!))](https://youtu.be/u42B4azsNho?si=RGp-uFcBqc7FhqBj)  
+
+- [YouTube_I Removed MediatR – Building Your Own CQRS Handlers in .NET](https://www.youtube.com/watch?v=j1OUToRyVHc)  
+- [YouTube_Building Your Own CQRS Pipeline With Decorators (Dropped MediatR!)](https://www.youtube.com/watch?v=gsluG8NdCfw)

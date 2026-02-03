@@ -1,7 +1,7 @@
 ﻿using FluentValidation;
 using MediatR;
 
-namespace Web.Api.Behaviors;
+namespace FeatureWithMediatR.Behaivors;
 
 /// <summary>
 /// MediatR の Pipeline Behavior。

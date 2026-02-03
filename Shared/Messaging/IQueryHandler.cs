@@ -1,4 +1,4 @@
-﻿namespace Application.Abstractions.Messaging;
+﻿namespace Shared.Messaging;
 
 public interface IQueryHandler<in TQuery, TResponse>
     where TQuery : IQuery<TResponse>

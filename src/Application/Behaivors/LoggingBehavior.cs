@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 
-namespace Application.Abstractions.Behaivors;
+namespace FeatureWithMediatR.Behaivors;
 
 /// <summary>
 /// MediatR の Pipeline Behavior（Serilogロギング処理）

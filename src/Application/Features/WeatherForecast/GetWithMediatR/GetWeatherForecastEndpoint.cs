@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 
-namespace Application.Features.WeatherForecast.GetWithMediatR;
+namespace FeatureWithMediatR.Features.WeatherForecast.GetWithMediatR;
 
 /// <summary>
 /// WeatherForecast機能のエンドポイント定義モジュール
@@ -23,7 +23,7 @@ public sealed class GetWeatherForecastEndpoint : ICarterModule
             var result = await sender.Send(new WeatherForecastQuery(), ct);
             return Results.Ok(result);
         })
-        .WithTags("Weather")
+        .WithTags("WithMediatR")
         //.WithName("GetWeatherForecast_MediatR")
         //.WithDescription("Retrieves a 5-day weather forecast with temperature and conditions")
         .Produces<IEnumerable<WeatherForecastResponse>>(StatusCodes.Status200OK);

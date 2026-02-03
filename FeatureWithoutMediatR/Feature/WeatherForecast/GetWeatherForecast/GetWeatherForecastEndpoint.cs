@@ -1,10 +1,10 @@
-﻿using Application.Abstractions.Messaging;
-using Carter;
+﻿using Carter;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Shared.Messaging;
 
-namespace Application.Features.WeatherForecast.GetWithSelfMaid;
+namespace FeatureWithoutMediatR.Feature.WeatherForecast.GetWeatherForecast;
 
 /// <summary>
 /// WeatherForecast機能のエンドポイント定義モジュール
@@ -25,7 +25,7 @@ public sealed class GetWeatherForecastEndpoint : ICarterModule
             var result = await handler.Handle(new WeatherForecastQuery(), ct);
             return Results.Ok(result);
         })
-        .WithTags("Weather")
+        .WithTags("WithoutMediatR")
         //.WithName("GetWeatherForecast_SelfMade")
         //.WithDescription("Retrieves a 5-day weather forecast with temperature and conditions")
         .Produces<IEnumerable<WeatherForecastResponse>>(StatusCodes.Status200OK);

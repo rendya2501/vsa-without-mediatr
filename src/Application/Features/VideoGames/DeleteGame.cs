@@ -2,7 +2,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
-namespace Application.Features.VideoGames;
+namespace FeatureWithMediatR.Features.VideoGames;
 
 /// <summary>
 /// 「ゲーム削除」機能の垂直スライス

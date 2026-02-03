@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 
-namespace Application.Features.VideoGames;
+namespace FeatureWithMediatR.Features.VideoGames;
 
 /// <summary>
 /// Video Gamesに関連するすべてのエンドポイントを管理するモジュール
@@ -13,7 +13,7 @@ public sealed class VideoGamesModule : ICarterModule
     public void AddRoutes(IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/api/games")
-            .WithTags("Games");
+            .WithTags("WithMediatR");
 
         // GetAll 
         group.MapGet("/", GetAllGames.Endpoint)

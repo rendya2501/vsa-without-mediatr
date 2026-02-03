@@ -1,6 +1,6 @@
-﻿using Application.Abstractions.Messaging;
+﻿using Shared.Messaging;
 
-namespace Application.Features.WeatherForecast.GetWithSelfMaid;
+namespace FeatureWithoutMediatR.Feature.WeatherForecast.GetWeatherForecast;
 
 /// <summary>
 /// クエリハンドラ（天気予報データ生成処理）

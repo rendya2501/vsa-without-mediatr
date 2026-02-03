@@ -1,10 +1,11 @@
-using Application.Features.VideoGames;
+using Domain.Entities;
+using FeatureWithMediatR.Features.VideoGames;
+using FeatureWithoutMediatR.Feature.VideoGames.GetGameById;
 using FluentAssertions;
+using Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
-using VideoGameApiVsa.Entities;
-using Web.Api.Data;
 
-namespace VideoGameApiVsa.Tests.Features.VideoGames;
+namespace Tests.Features.VideoGames;
 
 /// <summary>
 /// GetGameById機能のテストクラス

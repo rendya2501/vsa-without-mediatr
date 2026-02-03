@@ -1,4 +1,4 @@
-﻿namespace Application.Abstractions.Messaging;
+﻿namespace Shared.Messaging;
 
 public interface ICommand;
 

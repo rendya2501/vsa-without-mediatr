@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace Application.Features.WeatherForecast.GetWithMediatR;
+namespace FeatureWithMediatR.Features.WeatherForecast.GetWithMediatR;
 
 /// <summary>
 /// クエリハンドラ（天気予報データ生成処理）

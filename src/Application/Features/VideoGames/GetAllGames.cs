@@ -3,7 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
-namespace Application.Features.VideoGames;
+namespace FeatureWithMediatR.Features.VideoGames;
 
 /// <summary>
 /// 「ゲーム一覧取得」機能の垂直スライス

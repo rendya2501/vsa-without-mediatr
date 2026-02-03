@@ -1,4 +1,4 @@
-﻿namespace SharedKernel;
+﻿namespace Domain.Kernel;
 
 public enum ErrorType
 {

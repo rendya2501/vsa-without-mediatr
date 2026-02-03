@@ -1,10 +1,14 @@
-﻿using Application.Features.VideoGames;
+﻿using FeatureWithMediatR.Features.VideoGames;
+using FeatureWithoutMediatR.Feature.VideoGames.CreateGame;
+using FeatureWithoutMediatR.Feature.VideoGames.GetAllGames;
+using FeatureWithoutMediatR.Feature.VideoGames.GetGameById;
+using FeatureWithoutMediatR.Feature.VideoGames.UpdateGame;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc.Testing;
 using System.Net;
 using System.Net.Http.Json;
 
-namespace VideoGameApiVsa.Tests.Features.VideoGames;
+namespace Tests.Features.VideoGames;
 
 /// <summary>
 /// VideoGamesの統合テストクラス
