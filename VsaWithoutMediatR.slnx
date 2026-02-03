@@ -8,12 +8,12 @@
     <File Path="README.md" />
   </Folder>
   <Folder Name="/src/">
-    <Project Path="FeatureWithoutMediatR/FeatureWithoutMediatR.csproj" Id="b536875b-3e27-49c6-97e2-4941e9fa1f94" />
-    <Project Path="Shared/Shared.csproj" Id="289df058-db66-4de3-9a54-492c4f56dec2" />
-    <Project Path="src/Application/FeatureWithMediatR.csproj" />
     <Project Path="src/Domain/Domain.csproj" />
+    <Project Path="src/DomainKernel/Domain.Kernel.csproj" />
+    <Project Path="src/FeatureWithMediatR/FeatureWithMediatR.csproj" />
+    <Project Path="src/FeatureWithoutMediatR/FeatureWithoutMediatR.csproj" />
     <Project Path="src/Infrastructure/Infrastructure.csproj" />
-    <Project Path="src/SharedKernel/Domain.Kernel.csproj" />
+    <Project Path="src/Shared/Shared.csproj" />
     <Project Path="src/Web.Api/Web.Api.csproj" />
   </Folder>
   <Folder Name="/tests/">

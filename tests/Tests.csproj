@@ -25,10 +25,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\Application\FeatureWithMediatR.csproj" />
+    <ProjectReference Include="..\src\DomainKernel\Domain.Kernel.csproj" />
     <ProjectReference Include="..\src\Domain\Domain.csproj" />
+    <ProjectReference Include="..\src\FeatureWithMediatR\FeatureWithMediatR.csproj" />
+    <ProjectReference Include="..\src\FeatureWithoutMediatR\FeatureWithoutMediatR.csproj" />
     <ProjectReference Include="..\src\Infrastructure\Infrastructure.csproj" />
-    <ProjectReference Include="..\src\SharedKernel\Domain.Kernel.csproj" />
     <ProjectReference Include="..\src\Web.Api\Web.Api.csproj" />
   </ItemGroup>
 
