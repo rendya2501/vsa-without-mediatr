@@ -35,7 +35,18 @@ try
 
     // DbContext（In-Memory Database）
     builder.Services.AddDbContext<VideoGameDbContext>(options =>
-        options.UseInMemoryDatabase("GameDB"));
+    {
+        if (builder.Environment.IsDevelopment())
+        {
+            options.UseInMemoryDatabase("GameDB");
+        }
+        else
+        {
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+            // options.UseSqlServer(connectionString);
+        }
+    });
+
     // DBシーダー登録
     builder.Services.AddScoped<IDbSeeder, VideoGameDbSeeder>();
 
