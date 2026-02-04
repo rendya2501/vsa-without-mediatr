@@ -103,5 +103,5 @@ internal static class ValidationDecorator
     /// <param name="validationFailures">バリデーションエラー</param>
     /// <returns>バリデーションエラー</returns>
     private static ValidationError CreateValidationError(ValidationFailure[] validationFailures) =>
-        new([.. validationFailures.Select(f => Error.Problem(f.ErrorCode, f.ErrorMessage))]);
+        new(validationFailures.Select(f => Error.Problem(f.ErrorCode, f.ErrorMessage)).ToArray());
 }
