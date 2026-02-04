@@ -10,8 +10,10 @@ namespace Web.Api.ExceptionHandlers;
 /// <remarks>
 /// FluentValidationの例外をRFC 7807準拠のProblemDetailsに変換
 /// </remarks>
-internal sealed class ValidationExceptionHandler(ILogger<ValidationExceptionHandler> logger)
-    : IExceptionHandler
+internal sealed class ValidationExceptionHandler(
+    ILogger<ValidationExceptionHandler> logger,
+    IHostEnvironment environment)
+        : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(
         HttpContext httpContext,
@@ -34,38 +36,27 @@ internal sealed class ValidationExceptionHandler(ILogger<ValidationExceptionHand
             Type = "https://tools.ietf.org/html/rfc7231#section-6.5.1",
             Title = "One or more validation errors occurred.",
             Status = StatusCodes.Status400BadRequest,
-            Instance = httpContext.Request.Path
+            Instance = httpContext.Request.Path,
+            Errors = validationException.Errors
+                .GroupBy(e => e.PropertyName)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(e => e.ErrorMessage).ToArray())
         };
 
-        // FluentValidationのエラーをProblemDetailsのErrors辞書に変換
-        // ①
-        //foreach (var error in validationException.Errors)
-        //{
-        //    if (problemDetails.Errors.ContainsKey(error.PropertyName))
-        //    {
-        //        // 同じプロパティに複数のエラーがある場合
-        //        var existingErrors = problemDetails.Errors[error.PropertyName].ToList();
-        //        existingErrors.Add(error.ErrorMessage);
-        //        problemDetails.Errors[error.PropertyName] = [.. existingErrors]; //existingErrors.ToArray()
-        //    }
-        //    else
-        //    {
-        //        problemDetails.Errors.Add(error.PropertyName, [error.ErrorMessage]);
-        //    }
-        //}
-
-        // FluentValidationのエラーをProblemDetailsのErrors辞書に変換
-        foreach (var error in validationException.Errors)
+        // 開発環境でのみ詳細情報を追加
+        if (environment.IsDevelopment())
         {
-            if (problemDetails.Errors.TryGetValue(error.PropertyName, out var existingErrors))
-            {
-                var merged = existingErrors.Concat([error.ErrorMessage]).ToArray();
-                problemDetails.Errors[error.PropertyName] = merged;
-            }
-            else
-            {
-                problemDetails.Errors[error.PropertyName] = [error.ErrorMessage];
-            }
+            problemDetails.Extensions["validationDetails"] = validationException.Errors
+                .Select(e => new
+                {
+                    e.PropertyName,
+                    e.ErrorMessage,
+                    e.ErrorCode,
+                    AttemptedValue = e.AttemptedValue?.ToString(),
+                    e.Severity
+                })
+                .ToArray();
         }
 
         httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
