@@ -1,114 +1,134 @@
 ﻿using DomainKernel;
 using FeatureShared.Messaging;
 using Microsoft.Extensions.Logging;
-using System.Diagnostics;
+using Serilog.Context;
 
 namespace FeatureWithoutMediatR.Behaivors;
 
+/// <summary>
+/// ロギングデコレーター
+/// </summary>
+/// <remarks>
+/// <para>
+/// すべてのコマンドとクエリをロギングする。
+/// </para>
+/// </remarks>
 internal static class LoggingDecorator
 {
-    internal sealed class QueryHandler<TQuery, TResponse> : IQueryHandler<TQuery, TResponse>
-        where TQuery : IQuery<TResponse>
+    /// <summary>
+    /// レスポンスありコマンドハンドラー
+    /// </summary>
+    /// <typeparam name="TCommand">コマンド</typeparam>
+    /// <typeparam name="TResponse">レスポンス</typeparam>
+    /// <param name="innerHandler">内部ハンドラー</param>
+    /// <param name="logger">ロガー</param>
+    /// <returns>レスポンス</returns>
+    internal sealed class CommandHandler<TCommand, TResponse>(
+        ICommandHandler<TCommand, TResponse> innerHandler,
+        ILogger<CommandHandler<TCommand, TResponse>> logger)
+            : ICommandHandler<TCommand, TResponse>
+            where TCommand : ICommand<TResponse>
     {
-        public Task<Result<TResponse>> Handle(TQuery query, CancellationToken cancellationToken = default)
+        public async Task<Result<TResponse>> Handle(TCommand command, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            string commandName = typeof(TCommand).Name;
+
+            logger.LogInformation("Processing command {Command}", commandName);
+
+            Result<TResponse> result = await innerHandler.Handle(command, cancellationToken);
+
+            if (result.IsSuccess)
+            {
+                logger.LogInformation("Completed command {Command}", commandName);
+            }
+            else
+            {
+                using (LogContext.PushProperty("Error", result.Error, true))
+                {
+                    logger.LogError("Completed command {Command} with error", commandName);
+                }
+            }
+
+            return result;
+        }
+    }
+
+    /// <summary>
+    /// レスポンスなしコマンドハンドラー
+    /// </summary>
+    /// <typeparam name="TCommand">コマンド</typeparam>
+    /// <param name="innerHandler">内部ハンドラー</param>
+    /// <param name="logger">ロガー</param>
+    /// <returns>レスポンス</returns>
+    internal sealed class CommandBaseHandler<TCommand>(
+        ICommandHandler<TCommand> innerHandler,
+        ILogger<CommandBaseHandler<TCommand>> logger)
+            : ICommandHandler<TCommand>
+            where TCommand : ICommand
+    {
+        public async Task<Result> Handle(TCommand command, CancellationToken cancellationToken)
+        {
+            string commandName = typeof(TCommand).Name;
+
+            logger.LogInformation("Processing command {Command}", commandName);
+
+            Result result = await innerHandler.Handle(command, cancellationToken);
+
+            if (result.IsSuccess)
+            {
+                logger.LogInformation("Completed command {Command}", commandName);
+            }
+            else
+            {
+                using (LogContext.PushProperty("Error", result.Error, true))
+                {
+                    logger.LogError("Completed command {Command} with error", commandName);
+                }
+            }
+
+            return result;
+        }
+    }
+
+    /// <summary>
+    /// クエリハンドラー
+    /// </summary>
+    /// <typeparam name="TQuery">クエリ</typeparam>
+    /// <typeparam name="TResponse">レスポンス</param>
+    /// <param name="innerHandler">内部ハンドラー</param>
+    /// <param name="logger">ロガー</param>
+    /// <returns>レスポンス</returns>
+    internal sealed class QueryHandler<TQuery, TResponse>(
+        IQueryHandler<TQuery, TResponse> innerHandler,
+        ILogger<QueryHandler<TQuery, TResponse>> logger)
+            : IQueryHandler<TQuery, TResponse>
+            where TQuery : IQuery<TResponse>
+    {
+        private readonly bool logInfoFlag = logger.IsEnabled(LogLevel.Information);
+
+        public async Task<Result<TResponse>> Handle(TQuery query, CancellationToken cancellationToken = default)
+        {
+            string requestName = typeof(TQuery).Name;
+
+            if (logInfoFlag)
+                logger.LogInformation("Processing request {RequestName}", requestName);
+
+            Result<TResponse> result = await innerHandler.Handle(query, cancellationToken);
+
+            if (result.IsSuccess)
+            {
+                if (logger.IsEnabled(LogLevel.Information))
+                    logger.LogInformation("Completed request {RequestName}", requestName);
+            }
+            else
+            {
+                using (LogContext.PushProperty("Error", result.Error, true))
+                {
+                    logger.LogError("Processing request {RequestName} with error", requestName);
+                }
+            }
+
+            return result;
         }
     }
 }
-
-//public class LoggingDecorator<TRequest, TResponse>(
-//    ILogger<LoggingDecorator<TRequest, TResponse>> logger)
-//    : IPipelineBehavior<TRequest, TResponse>
-//    where TRequest : class
-//    where TResponse : Result
-//{
-//    public async Task<TResponse> Handle(
-//        TRequest request,
-//        RequestHandlerDelegate<TResponse> next,
-//        CancellationToken cancellationToken)
-//    {
-//        // リクエスト名
-//        var requestName = typeof(TRequest).Name;
-//        // 短縮GUID (8文字)                                                          
-//        var requestGuid = Guid.NewGuid().ToString("N")[..8];
-//        // 機密情報をマスク
-//        var sanitizedRequest = SanitizeRequest(request);
-//        // 処理時間を計測
-//        var stopwatch = Stopwatch.StartNew();
-
-//        // リクエスト開始ログ
-//        // {@Request} で構造化ログとして記録(Serilogの機能)
-//        if (logger.IsEnabled(LogLevel.Information))
-//        {
-//            logger.LogInformation(
-//                "Handling {RequestName} [{RequestGuid}] {@Request}",
-//                requestName,
-//                requestGuid,
-//                sanitizedRequest);
-//        }
-
-//        TResponse response;
-
-//        try
-//        {
-//            // 次の処理を実行（ValidationBehavior → Handler）
-//            response = await next(cancellationToken);
-
-//            stopwatch.Stop();
-
-//            // リクエスト成功ログ
-//            // {@Response} で構造化ログとして記録
-//            if (logger.IsEnabled(LogLevel.Information))
-//            {
-//                logger.LogInformation(
-//                    "Handled {RequestName} [{RequestGuid}] in {ElapsedMilliseconds}ms {@Response}",
-//                    requestName,
-//                    requestGuid,
-//                    stopwatch.ElapsedMilliseconds,
-//                    response);
-//            }
-//        }
-//        catch (Exception ex)
-//        {
-//            stopwatch.Stop();
-
-//            // リクエスト失敗ログ（ValidationException も含む）
-//            // Serilogは例外オブジェクトを自動的に構造化して記録
-//            logger.LogError(
-//                ex,
-//                "Error handling {RequestName} [{RequestGuid}] after {ElapsedMilliseconds}ms",
-//                requestName,
-//                requestGuid,
-//                stopwatch.ElapsedMilliseconds);
-
-//            // 例外は再スローして、ExceptionHandler で処理させる
-//            throw;
-//        }
-
-//        return response;
-//    }
-
-//    /// <summary>
-//    /// リクエスト内容をマスク
-//    /// </summary>
-//    /// <param name="request">リクエスト</param>
-//    /// <returns>マスクされたリクエスト内容</returns>
-//    private static Dictionary<string, object?> SanitizeRequest(TRequest request)
-//    {
-//        // プロパティ名に "Password", "Secret", "Token" が含まれる場合はマスク
-//        var properties = typeof(TRequest).GetProperties()
-//            .Select(p => new
-//            {
-//                Name = p.Name,
-//                Value = p.Name.Contains("Password", StringComparison.OrdinalIgnoreCase) ||
-//                        p.Name.Contains("Secret", StringComparison.OrdinalIgnoreCase) ||
-//                        p.Name.Contains("Token", StringComparison.OrdinalIgnoreCase)
-//                    ? "***REDACTED***"
-//                    : p.GetValue(request)
-//            })
-//            .ToDictionary(x => x.Name, x => x.Value);
-
-//        return properties;
-//    }
-//}

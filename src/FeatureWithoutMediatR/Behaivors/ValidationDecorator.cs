@@ -1,57 +1,107 @@
-﻿//using FluentValidation;
+﻿using DomainKernel;
+using FeatureShared.Messaging;
+using FluentValidation;
+using FluentValidation.Results;
 
-//namespace FeatureWithoutMediatR.Behaivors;
+namespace FeatureWithoutMediatR.Behaivors;
 
-///// <summary>
-///// MediatR の Pipeline Behavior。
-///// Handler が呼ばれる前に FluentValidation を実行するための共通処理。
-///// </summary>
-///// <typeparam name="TRequest"></typeparam>
-///// <typeparam name="TResponse"></typeparam>
-///// <param name="validators"></param>
-///// <remarks>
-///// DI から「TRequest に対応する Validator」をすべて受け取る
-///// 通常は 0 個 or 1 個だが、複数あっても動く設計
-///// </remarks>
-//public class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TRequest>> validators)
-//    // MediatR のパイプラインに割り込むためのインターフェース
-//    : IPipelineBehavior<TRequest, TResponse>
-//    // TRequest は null 不可（ValidationContext が null を想定していないため）
-//    where TRequest : notnull
-//{
-//    /// <summary>
-//    /// MediatR が Request を処理するたびに必ず呼ばれるメソッド
-//    /// </summary>
-//    /// <param name="request">実際に送信された Command / Query</param>
-//    /// <param name="next">次の処理（次の Behavior or 最終的な Handler）</param>
-//    /// <param name="cancellationToken">キャンセル用トークン（ほぼ素通し）</param>
-//    /// <returns></returns>
-//    /// <exception cref="ValidationException"></exception>
-//    public async Task<TResponse> Handle(
-//        TRequest request,
-//        RequestHandlerDelegate<TResponse> next,
-//        CancellationToken cancellationToken)
-//    {
-//        // この Request に対応する Validator が 1 つ以上存在するか？
-//        if (validators.Any())
-//        {
-//            // FluentValidation 用の検証コンテキストを作成
-//            var context = new ValidationContext<TRequest>(request);
-//            // すべての Validator を実行し、エラーを平坦化してリスト化
-//            var failures = validators
-//                .Select(v => v.Validate(context))   // 各 Validator で検証を実行
-//                .SelectMany(r => r.Errors)          // 各 ValidationResult の Errors を 1 つの列にまとめる
-//                .Where(f => f != null)              // 念のため null を除外
-//                .ToList();
+/// <summary>
+/// バリデーションデコレーター
+/// </summary>
+/// <remarks>
+/// <para>
+/// すべてのコマンドとクエリをバリデーションする。
+/// </para>
+/// </remarks>
+internal static class ValidationDecorator
+{
+    /// <summary>
+    /// レスポンスありコマンドハンドラー
+    /// </summary>
+    /// <typeparam name="TCommand">コマンド</typeparam>
+    /// <typeparam name="TResponse">レスポンス</typeparam>
+    /// <param name="innerHandler">内部ハンドラー</param>
+    /// <param name="validators">バリデーター</param>
+    /// <returns>レスポンス</returns>
+    internal sealed class CommandHandler<TCommand, TResponse>(
+        ICommandHandler<TCommand, TResponse> innerHandler,
+        IEnumerable<IValidator<TCommand>> validators)
+            : ICommandHandler<TCommand, TResponse>
+            where TCommand : ICommand<TResponse>
+    {
+        public async Task<Result<TResponse>> Handle(TCommand command, CancellationToken cancellationToken)
+        {
+            ValidationFailure[] validationFailures = await ValidateAsync(command, validators);
 
-//            // 1 件でもエラーがあれば Handler を呼ばずに例外を投げる
-//            if (failures.Count != 0)
-//            {
-//                throw new ValidationException(failures);
-//            }
-//        }
+            if (validationFailures.Length == 0)
+            {
+                return await innerHandler.Handle(command, cancellationToken);
+            }
 
-//        // 検証を通過した場合のみ、次の処理へ進む（次の Behavior or 実際の Handler）
-//        return await next(cancellationToken);
-//    }
-//}
+            return Result.Failure<TResponse>(CreateValidationError(validationFailures));
+        }
+    }
+
+    /// <summary>
+    /// レスポンスなしコマンドハンドラー
+    /// </summary>
+    /// <typeparam name="TCommand">コマンド</typeparam>
+    /// <param name="innerHandler">内部ハンドラー</param>
+    /// <param name="validators">バリデーター</param>
+    /// <returns>レスポンス</returns>
+    internal sealed class CommandBaseHandler<TCommand>(
+        ICommandHandler<TCommand> innerHandler,
+        IEnumerable<IValidator<TCommand>> validators)
+            : ICommandHandler<TCommand>
+            where TCommand : ICommand
+    {
+        public async Task<Result> Handle(TCommand command, CancellationToken cancellationToken)
+        {
+            ValidationFailure[] validationFailures = await ValidateAsync(command, validators);
+
+            if (validationFailures.Length == 0)
+            {
+                return await innerHandler.Handle(command, cancellationToken);
+            }
+
+            return Result.Failure(CreateValidationError(validationFailures));
+        }
+    }
+
+    /// <summary>
+    /// バリデーションを実行する
+    /// </summary>
+    /// <typeparam name="TCommand">コマンド</typeparam>
+    /// <param name="command">コマンド</param>
+    /// <param name="validators">バリデーター</param>
+    /// <returns>バリデーションエラー</returns>
+    private static async Task<ValidationFailure[]> ValidateAsync<TCommand>(
+        TCommand command,
+        IEnumerable<IValidator<TCommand>> validators)
+    {
+        if (!validators.Any())
+        {
+            return [];
+        }
+
+        var context = new ValidationContext<TCommand>(command);
+
+        ValidationResult[] validationResults = await Task.WhenAll(
+            validators.Select(validator => validator.ValidateAsync(context)));
+
+        ValidationFailure[] validationFailures = validationResults
+            .Where(validationResult => !validationResult.IsValid)
+            .SelectMany(validationResult => validationResult.Errors)
+            .ToArray();
+
+        return validationFailures;
+    }
+
+    /// <summary>
+    /// バリデーションエラーを作成する
+    /// </summary>
+    /// <param name="validationFailures">バリデーションエラー</param>
+    /// <returns>バリデーションエラー</returns>
+    private static ValidationError CreateValidationError(ValidationFailure[] validationFailures) =>
+        new([.. validationFailures.Select(f => Error.Problem(f.ErrorCode, f.ErrorMessage))]);
+}

@@ -48,12 +48,6 @@ public sealed class CreateGameEndpoint : ICarterModule
 
                 var result = await handler.Handle(command, cancellationToken);
 
-                // 201 Created + Location ヘッダ付きレスポンス
-                var createdAtRoute = Results.CreatedAtRoute(
-                    routeName: VideoGameRounteNames.GetById,
-                    routeValues: new { id = result.Value.Id },
-                    value: result);
-
                 return result.Match(
                     response => Results.CreatedAtRoute(
                         routeName: VideoGameRounteNames.GetById,
