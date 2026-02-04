@@ -79,8 +79,8 @@ public static class DependencyInjection
         //    .WithScopedLifetime());
 
 
-        // =================================================================== 
-        // バリデーションの登録
+        // ===================================================================
+        // FluentValidationの登録
         // ===================================================================
         services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly, includeInternalTypes: true);
 
