@@ -44,7 +44,7 @@ public class Result
     /// <summary>
     /// 値あり成功を生成
     /// </summary>
-    public static OperationResult<T> Success<T>(T value) => new(value, true, null);
+    public static Result<T> Success<T>(T value) => new(value, true, null);
 
     /// <summary>
     /// 値なし失敗を生成
@@ -58,7 +58,7 @@ public class Result
     /// 型推論が効かない場合のみ使用。
     /// 通常は Failure(error) で十分（戻り値の型から推論される）。
     /// </remarks>
-    public static OperationResult<T> Failure<T>(Error error) => new(default, false, error);
+    public static Result<T> Failure<T>(Error error) => new(default, false, error);
 
     /// <summary>
     /// エラーからの暗黙的変換
@@ -71,7 +71,7 @@ public class Result
 /// 値を返す操作の結果
 /// </summary>
 /// <typeparam name="T">成功時に返す値の型</typeparam>
-public class OperationResult<T>(T? value, bool isSuccess, Error? error) : Result(isSuccess, error)
+public class Result<T>(T? value, bool isSuccess, Error? error) : Result(isSuccess, error)
 {
     /// <summary>
     /// 成功時の値を取得
@@ -85,10 +85,10 @@ public class OperationResult<T>(T? value, bool isSuccess, Error? error) : Result
     /// <summary>
     /// エラーからの暗黙的変換
     /// </summary>
-    public static implicit operator OperationResult<T>(Error error) => Failure<T>(error);
+    public static implicit operator Result<T>(Error error) => Failure<T>(error);
 
     /// <summary>
     /// 値からの暗黙的変換
     /// </summary>
-    public static implicit operator OperationResult<T>(T value) => Success(value);
+    public static implicit operator Result<T>(T value) => Success(value);
 }
