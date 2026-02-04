@@ -48,10 +48,11 @@ public class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TReq
 
         // 各 Validator で検証を実行
         var results = await Task.WhenAll(
-            validators.Select(v => v.ValidateAsync(context, cancellationToken)));
+            validatorArray.Select(v => v.ValidateAsync(context, cancellationToken)));
 
         // すべての Validator を実行し、エラーを平坦化してリスト化
         var failures = results
+            .Where(r => !r.IsValid)
             .SelectMany(r => r.Errors)          // 各 ValidationResult の Errors を 1 つの列にまとめる
             .ToList();
 
