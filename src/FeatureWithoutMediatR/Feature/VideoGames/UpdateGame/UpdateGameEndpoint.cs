@@ -1,14 +1,17 @@
 ﻿using Carter;
+using Domain.VideoGame;
+using FeatureShared.Extensions;
+using FeatureShared.Infrastructure;
+using FeatureShared.Messaging;
 using FeatureWithoutMediatR.Constants;
 using FeatureWithoutMediatR.Extension;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
-using Shared.Messaging;
 
 namespace FeatureWithoutMediatR.Feature.VideoGames.UpdateGame;
 
-public sealed class UpdateGameEndpoint2 : ICarterModule
+public sealed class UpdateGameEndpoint : ICarterModule
 {
     /// <summary>
     /// ゲーム更新リクエスト（外部APIインターフェース）
@@ -23,7 +26,7 @@ public sealed class UpdateGameEndpoint2 : ICarterModule
     public record UpdateGameRequest(
         string Title,
         string Genre,
-        int ReleaseYear = VideoGameConstants.Validation.ReleaseYear.DefaultValue);
+        int ReleaseYear = VideoGameValidationRules.ReleaseYear.DefaultValue);
 
     public void AddRoutes(IEndpointRouteBuilder app)
     {
@@ -31,20 +34,16 @@ public sealed class UpdateGameEndpoint2 : ICarterModule
             .MapPut("/{id:int}", async (
                 int id,
                 UpdateGameRequest request,
-                ICommandHandler<UpdateGameCommand, UpdateGameResponse?> handler,
+                ICommandHandler<UpdateGameCommand, UpdateGameResponse> handler,
                 CancellationToken cancellationToken) =>
             {
                 var command = new UpdateGameCommand(id, request.Title, request.Genre, request.ReleaseYear);
+
                 var result = await handler.Handle(command, cancellationToken);
 
-                if (result is null)
-                {
-                    return Results.NotFound($"Video game with id {id} not found.");
-                }
-
-                return Results.Ok(result);
+                return result.Match(Results.Ok, CustomResults.Problem);
             })
-            .WithName(VideoGameConstants.RouteNames.Update)
+            .WithName(VideoGameRounteNames.Update)
             //.WithSummary("Update an existing video game")
             .WithDescription("Updates an existing video game by its ID")
             .Produces<UpdateGameResponse>(StatusCodes.Status200OK)

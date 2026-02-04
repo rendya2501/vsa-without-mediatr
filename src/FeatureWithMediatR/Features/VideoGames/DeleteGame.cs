@@ -1,4 +1,8 @@
-﻿using Infrastructure.Database;
+﻿using Domain.VideoGame;
+using DomainKernel;
+using FeatureShared.Extensions;
+using FeatureShared.Infrastructure;
+using Infrastructure.Database;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
@@ -29,12 +33,12 @@ public static class DeleteGame
     /// <remarks>
     /// 削除成功時はtrue、対象が存在しない場合はfalseを返す。
     /// </remarks>
-    public record DeleteGameCommand(int Id) : IRequest<bool>;
+    public record DeleteGameCommand(int Id) : IRequest<Result>;
 
     /// <summary>
     /// コマンドハンドラ（削除処理実行）
     /// </summary>
-    public class Handler(VideoGameDbContext dbContext) : IRequestHandler<DeleteGameCommand, bool>
+    public class Handler(VideoGameDbContext dbContext) : IRequestHandler<DeleteGameCommand, Result>
     {
         /// <summary>
         /// ゲーム削除処理を実行
@@ -42,19 +46,19 @@ public static class DeleteGame
         /// <param name="command">削除コマンド</param>
         /// <param name="cancellationToken">キャンセルトークン</param>
         /// <returns>削除成功時true、対象不在時false</returns>
-        public async Task<bool> Handle(DeleteGameCommand command, CancellationToken cancellationToken)
+        public async Task<Result> Handle(DeleteGameCommand command, CancellationToken cancellationToken)
         {
             var videoGame = await dbContext.VideoGames.FindAsync([command.Id], cancellationToken);
 
             if (videoGame is null)
             {
-                return false;
+                return Result.Failure(VideoGameErrors.NotFound(command.Id));
             }
 
             dbContext.VideoGames.Remove(videoGame);
             await dbContext.SaveChangesAsync(cancellationToken);
 
-            return true;
+            return Result.Success();
         }
     }
 
@@ -70,13 +74,7 @@ public static class DeleteGame
     /// </remarks>
     public static async Task<IResult> Endpoint(ISender sender, int id, CancellationToken cancellationToken)
     {
-        var deleted = await sender.Send(new DeleteGameCommand(id), cancellationToken);
-
-        if (deleted is false)
-        {
-            return Results.NotFound($"Video game with id {id} not found.");
-        }
-
-        return Results.NoContent();
+        var result = await sender.Send(new DeleteGameCommand(id), cancellationToken);
+        return result.Match(Results.NoContent, CustomResults.Problem);
     }
 }

@@ -1,6 +1,6 @@
-﻿using FluentValidation;
+﻿using FeatureShared.Messaging;
+using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
-using Shared.Messaging;
 
 namespace FeatureWithoutMediatR;
 
@@ -9,16 +9,31 @@ public static class DependencyInjection
     public static IServiceCollection AddFeatureWithoutMediatR(this IServiceCollection services)
     {
         // 自動登録の例
+        // ①
+        //services.Scan(scan => scan
+        //    .FromAssembliesOf(typeof(DependencyInjection))
+        //    .AddClasses(classes => classes.Where(type =>
+        //        type.GetInterfaces().Any(@interface =>
+        //            @interface.IsGenericType &&
+        //            (@interface.GetGenericTypeDefinition() == typeof(IQueryHandler<,>) ||
+        //             @interface.GetGenericTypeDefinition() == typeof(ICommandHandler<>) ||
+        //             @interface.GetGenericTypeDefinition() == typeof(ICommandHandler<,>)))),
+        //        publicOnly: false)
+        //    .AsImplementedInterfaces()
+        //    .WithScopedLifetime());
+        // ②
         services.Scan(scan => scan
             .FromAssembliesOf(typeof(DependencyInjection))
-            .AddClasses(classes => classes
-                .Where(type =>
-                    type.IsAssignableTo(typeof(IQueryHandler<,>)) ||
-                    type.IsAssignableTo(typeof(ICommandHandler<>)) ||
-                    type.IsAssignableTo(typeof(ICommandHandler<,>))),
-                publicOnly: false)
+            .AddClasses(classes => classes.AssignableTo(typeof(IQueryHandler<,>)), publicOnly: false)
             .AsImplementedInterfaces()
-            .WithScopedLifetime());
+            .WithScopedLifetime()
+            .AddClasses(classes => classes.AssignableTo(typeof(ICommandHandler<>)), publicOnly: false)
+            .AsImplementedInterfaces()
+            .WithScopedLifetime()
+            .AddClasses(classes => classes.AssignableTo(typeof(ICommandHandler<,>)), publicOnly: false)
+            .AsImplementedInterfaces()
+        .WithScopedLifetime());
+
 
         // 手動登録の例
         // ハンドラーを追加する度にここに追記する必要があるため、自動登録を推奨

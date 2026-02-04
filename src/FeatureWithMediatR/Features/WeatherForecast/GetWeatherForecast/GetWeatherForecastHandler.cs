@@ -1,6 +1,7 @@
-﻿using MediatR;
+﻿using DomainKernel;
+using MediatR;
 
-namespace FeatureWithMediatR.Features.WeatherForecast.GetWithMediatR;
+namespace FeatureWithMediatR.Features.WeatherForecast.GetWeatherForecast;
 
 /// <summary>
 /// クエリハンドラ（天気予報データ生成処理）
@@ -10,8 +11,8 @@ namespace FeatureWithMediatR.Features.WeatherForecast.GetWithMediatR;
 /// コンストラクタパラメータを持たない。
 /// 本番環境では IWeatherService を注入して実装する想定。
 /// </remarks>
-internal sealed class GetWeatherForecastHandler 
-    : IRequestHandler<WeatherForecastQuery, IEnumerable<WeatherForecastResponse>>
+internal sealed class GetWeatherForecastHandler
+    : IRequestHandler<WeatherForecastQuery, Result<IEnumerable<WeatherForecastResponse>>>
 {
     /// <summary>
     /// 天気の状態を表す定数
@@ -40,7 +41,9 @@ internal sealed class GetWeatherForecastHandler
     /// <param name="_">天気予報取得クエリ</param>
     /// <param name="cancellationToken">キャンセルトークン（現在の実装では未使用）</param>
     /// <returns>5日分の天気予報データ</returns>
-    public Task<IEnumerable<WeatherForecastResponse>> Handle(WeatherForecastQuery _, CancellationToken cancellationToken)
+    public async Task<Result<IEnumerable<WeatherForecastResponse>>> Handle(
+        WeatherForecastQuery _,
+        CancellationToken cancellationToken)
     {
         // 5日分の天気予報を生成
         var forecast = Enumerable.Range(1, 5).Select(index =>
@@ -58,7 +61,6 @@ internal sealed class GetWeatherForecastHandler
             );
         });
 
-        // 同期処理だが、IRequestHandlerのインターフェース要件を満たすためTask.FromResultで包む
-        return Task.FromResult(forecast);
+        return Result.Success(forecast);
     }
 }

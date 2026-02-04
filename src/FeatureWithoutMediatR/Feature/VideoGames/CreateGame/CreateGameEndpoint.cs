@@ -1,14 +1,17 @@
 ﻿using Carter;
+using Domain.VideoGame;
+using FeatureShared.Extensions;
+using FeatureShared.Infrastructure;
+using FeatureShared.Messaging;
 using FeatureWithoutMediatR.Constants;
 using FeatureWithoutMediatR.Extension;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
-using Shared.Messaging;
 
 namespace FeatureWithoutMediatR.Feature.VideoGames.CreateGame;
 
-public sealed class CreateGameEndpoint2 : ICarterModule
+public sealed class CreateGameEndpoint : ICarterModule
 {
     /// <summary>
     /// ゲーム作成リクエスト（外部APIインターフェース）
@@ -23,8 +26,7 @@ public sealed class CreateGameEndpoint2 : ICarterModule
     private record CreateGameRequest(
         string Title,
         string Genre,
-        int ReleaseYear = VideoGameConstants.Validation.ReleaseYear.DefaultValue);
-
+        int ReleaseYear = VideoGameValidationRules.ReleaseYear.DefaultValue);
 
     /// <summary>
     /// 
@@ -38,23 +40,28 @@ public sealed class CreateGameEndpoint2 : ICarterModule
                 ICommandHandler<CreateGameCommand, CreateGameResponse> handler,
                 CancellationToken cancellationToken) =>
             {
-                // 外部入力 DTO → 内部 Command へ変換
                 var command = new CreateGameCommand(
                     request.Title,
                     request.Genre,
                     request.ReleaseYear
                 );
 
-                // MediatR 経由で処理を実行
                 var result = await handler.Handle(command, cancellationToken);
 
                 // 201 Created + Location ヘッダ付きレスポンス
-                return Results.CreatedAtRoute(
-                    routeName: VideoGameConstants.RouteNames.GetById,
-                    routeValues: new { id = result.Id },
+                var createdAtRoute = Results.CreatedAtRoute(
+                    routeName: VideoGameRounteNames.GetById,
+                    routeValues: new { id = result.Value.Id },
                     value: result);
+
+                return result.Match(
+                    response => Results.CreatedAtRoute(
+                        routeName: VideoGameRounteNames.GetById,
+                        routeValues: new { id = response.Id },
+                        value: response), 
+                    CustomResults.Problem);
             })
-            .WithName(VideoGameConstants.RouteNames.Create)
+            .WithName(VideoGameRounteNames.Create)
             //.WithSummary("Create a new video game")
             .WithDescription("Creates a new video game entry in the database")
             .ProducesValidationProblem()

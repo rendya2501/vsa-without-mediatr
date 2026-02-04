@@ -1,4 +1,4 @@
-﻿using Shared.Messaging;
+﻿using FeatureShared.Messaging;
 
 namespace FeatureWithoutMediatR.Feature.VideoGames.GetAllGames;
 

@@ -1,3 +1,3 @@
-﻿namespace Shared.Messaging;
+﻿namespace FeatureShared.Messaging;
 
 public interface IQuery<TResponse>;

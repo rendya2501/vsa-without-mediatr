@@ -1,6 +1,6 @@
-﻿namespace Domain.Entities;
+﻿namespace Domain.VideoGame;
 
-public class VideoGame
+public class VideoGame // Entity
 {
     public int Id { get; set; }
     public required string Title { get; set; }

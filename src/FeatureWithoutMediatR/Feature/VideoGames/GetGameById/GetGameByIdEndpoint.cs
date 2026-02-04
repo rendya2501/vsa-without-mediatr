@@ -1,33 +1,29 @@
 ﻿using Carter;
+using FeatureShared.Extensions;
+using FeatureShared.Infrastructure;
+using FeatureShared.Messaging;
 using FeatureWithoutMediatR.Constants;
 using FeatureWithoutMediatR.Extension;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
-using Shared.Messaging;
 
 namespace FeatureWithoutMediatR.Feature.VideoGames.GetGameById;
 
-public sealed class GetGameByIdEndpoint2 : ICarterModule
+public sealed class GetGameByIdEndpoint : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
         app.MapApiGroup("/api/games2", "WithoutMediatR")
             .MapGet("/{id:int}", async (
                 int id,
-                IQueryHandler<GetGameByIdQuery, GetGameByIdResponse?> handler,
+                IQueryHandler<GetGameByIdQuery, GetGameByIdResponse> handler,
                 CancellationToken cancellationToken) =>
             {
                 var result = await handler.Handle(new GetGameByIdQuery(id), cancellationToken);
-
-                if (result is null)
-                {
-                    return Results.NotFound($"Video game with id {id} not found.");
-                }
-
-                return Results.Ok(result);
+                return result.Match(Results.Ok, CustomResults.Problem);
             })
-            .WithName(VideoGameConstants.RouteNames.GetById)
+            .WithName(VideoGameRounteNames.GetById)
             //.WithSummary("Get a video game by ID")
             .WithDescription("Retrieves a specific video game by its ID")
             .Produces<GetGameByIdResponse>(StatusCodes.Status200OK)

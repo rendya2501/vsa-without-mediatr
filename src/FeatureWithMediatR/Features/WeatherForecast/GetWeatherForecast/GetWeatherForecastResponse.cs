@@ -1,4 +1,4 @@
-﻿namespace FeatureWithMediatR.Features.WeatherForecast.GetWithMediatR;
+﻿namespace FeatureWithMediatR.Features.WeatherForecast.GetWeatherForecast;
 
 /// <summary>
 /// 天気予報のレスポンスDTO

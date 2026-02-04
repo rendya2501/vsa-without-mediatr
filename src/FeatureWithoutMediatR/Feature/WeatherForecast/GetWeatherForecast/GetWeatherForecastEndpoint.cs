@@ -1,8 +1,8 @@
 ﻿using Carter;
+using FeatureShared.Messaging;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
-using Shared.Messaging;
 
 namespace FeatureWithoutMediatR.Feature.WeatherForecast.GetWeatherForecast;
 

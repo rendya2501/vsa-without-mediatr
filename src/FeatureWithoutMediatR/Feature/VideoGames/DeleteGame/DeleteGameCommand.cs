@@ -1,4 +1,4 @@
-﻿using Shared.Messaging;
+﻿using FeatureShared.Messaging;
 
 namespace FeatureWithoutMediatR.Feature.VideoGames.DeleteGame;
 
@@ -9,4 +9,4 @@ namespace FeatureWithoutMediatR.Feature.VideoGames.DeleteGame;
 /// <remarks>
 /// 削除成功時はtrue、対象が存在しない場合はfalseを返す。
 /// </remarks>
-internal sealed record DeleteGameCommand(int Id) : ICommand<bool>;
+internal sealed record DeleteGameCommand(int Id) : ICommand;

@@ -1,4 +1,5 @@
 ﻿using Carter;
+using FeatureWithMediatR.Constans;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -17,14 +18,14 @@ public sealed class VideoGamesModule : ICarterModule
 
         // GetAll 
         group.MapGet("/", GetAllGames.Endpoint)
-            .WithName(VideoGameConstants.RouteNames.GetAll)
+            .WithName(VideoGameRounteNames.GetAll)
             //.WithSummary("Get all video games")
             .WithDescription("Retrieves a list of all video games in the database")
             .Produces<IEnumerable<GetAllGames.GetAllGamesResponse>>(StatusCodes.Status200OK);
 
         // GetByID
         group.MapGet("/{id:int}", GetGameById.Endpoint)
-            .WithName(VideoGameConstants.RouteNames.GetById)
+            .WithName(VideoGameRounteNames.GetById)
             //.WithSummary("Get a video game by ID")
             .WithDescription("Retrieves a specific video game by its ID")
             .Produces<GetGameById.GetGameByIdResponse>(StatusCodes.Status200OK)
@@ -32,7 +33,7 @@ public sealed class VideoGamesModule : ICarterModule
 
         // Create
         group.MapPost("/", CreateGame.Endpoint)
-            .WithName(VideoGameConstants.RouteNames.Create)
+            .WithName(VideoGameRounteNames.Create)
             //.WithSummary("Create a new video game")
             .WithDescription("Creates a new video game entry in the database")
             .ProducesValidationProblem()
@@ -41,7 +42,7 @@ public sealed class VideoGamesModule : ICarterModule
 
         // Update
         group.MapPut("/{id:int}", UpdateGame.Endpoint)
-            .WithName(VideoGameConstants.RouteNames.Update)
+            .WithName(VideoGameRounteNames.Update)
             //.WithSummary("Update an existing video game")
             .WithDescription("Updates an existing video game by its ID")
             .Produces<UpdateGame.UpdateGameResponse>(StatusCodes.Status200OK)
@@ -51,7 +52,7 @@ public sealed class VideoGamesModule : ICarterModule
 
         // Delete
         group.MapDelete("/{id:int}", DeleteGame.Endpoint)
-            .WithName(VideoGameConstants.RouteNames.Delete)
+            .WithName(VideoGameRounteNames.Delete)
             //.WithSummary("Delete a video game")
             .WithDescription("Deletes a video game by its ID")
             .Produces(StatusCodes.Status204NoContent)

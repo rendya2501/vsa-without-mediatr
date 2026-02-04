@@ -1,5 +1,7 @@
-﻿using Infrastructure.Database;
-using Shared.Messaging;
+﻿using Domain.VideoGame;
+using DomainKernel;
+using FeatureShared.Messaging;
+using Infrastructure.Database;
 
 namespace FeatureWithoutMediatR.Feature.VideoGames.DeleteGame;
 
@@ -7,7 +9,7 @@ namespace FeatureWithoutMediatR.Feature.VideoGames.DeleteGame;
 /// コマンドハンドラ（削除処理実行）
 /// </summary>
 internal sealed class DeleteGameHandler(VideoGameDbContext dbContext)
-    : ICommandHandler<DeleteGameCommand, bool>
+    : ICommandHandler<DeleteGameCommand>
 {
     /// <summary>
     /// ゲーム削除処理を実行
@@ -15,18 +17,22 @@ internal sealed class DeleteGameHandler(VideoGameDbContext dbContext)
     /// <param name="command">削除コマンド</param>
     /// <param name="cancellationToken">キャンセルトークン</param>
     /// <returns>削除成功時true、対象不在時false</returns>
-    public async Task<bool> Handle(DeleteGameCommand command, CancellationToken cancellationToken)
+    public async Task<Result> Handle(DeleteGameCommand command, CancellationToken cancellationToken)
     {
         var videoGame = await dbContext.VideoGames.FindAsync([command.Id], cancellationToken);
 
         if (videoGame is null)
         {
-            return false;
+            return Result.Failure(VideoGameErrors.NotFound(command.Id));
         }
 
         dbContext.VideoGames.Remove(videoGame);
+
+        // domain events could be dispatched here if needed
+        // todoItem.Raise(new TodoItemDeletedDomainEvent(todoItem.Id));
+
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        return true;
+        return Result.Success();
     }
 }

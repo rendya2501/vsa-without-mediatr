@@ -1,13 +1,15 @@
-﻿namespace Shared.Messaging;
+﻿using DomainKernel;
+
+namespace FeatureShared.Messaging;
 
 public interface ICommandHandler<in TCommand>
     where TCommand : ICommand
 {
-    Task Handle(TCommand command, CancellationToken cancellationToken = default);
+    Task<Result> Handle(TCommand command, CancellationToken cancellationToken = default);
 }
 
 public interface ICommandHandler<in TCommand, TResponse>
     where TCommand : ICommand<TResponse>
 {
-    Task<TResponse> Handle(TCommand command, CancellationToken cancellationToken = default);
+    Task<Result<TResponse>> Handle(TCommand command, CancellationToken cancellationToken = default);
 }

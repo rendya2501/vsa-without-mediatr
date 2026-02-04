@@ -1,4 +1,8 @@
-﻿using Infrastructure.Database;
+﻿using Domain.VideoGame;
+using DomainKernel;
+using FeatureShared.Extensions;
+using FeatureShared.Infrastructure;
+using Infrastructure.Database;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 
@@ -34,7 +38,7 @@ public static class GetGameById
     /// <remarks>
     /// 戻り値がnullableであり、データ不在時はnullを返す設計。
     /// </remarks>
-    public record GetGameByIdQuery(int Id) : IRequest<GetGameByIdResponse?>;
+    public record GetGameByIdQuery(int Id) : IRequest<Result<GetGameByIdResponse>>;
 
     /// <summary>
     /// ゲーム詳細レスポンス
@@ -52,7 +56,8 @@ public static class GetGameById
     /// <summary>
     /// クエリハンドラ（詳細取得処理実行）
     /// </summary>
-    public class Handler(VideoGameDbContext dbContext) : IRequestHandler<GetGameByIdQuery, GetGameByIdResponse?>
+    public class Handler(VideoGameDbContext dbContext)
+        : IRequestHandler<GetGameByIdQuery, Result<GetGameByIdResponse>>
     {
         /// <summary>
         /// 指定IDのゲーム情報を取得
@@ -65,16 +70,22 @@ public static class GetGameById
         /// 存在チェックをハンドラ内で行い、nullを返すことで
         /// Endpointでの404判定を可能にしている。
         /// </remarks>
-        public async Task<GetGameByIdResponse?> Handle(GetGameByIdQuery query, CancellationToken cancellationToken)
+        public async Task<Result<GetGameByIdResponse>> Handle(GetGameByIdQuery query, CancellationToken cancellationToken)
         {
             var videoGame = await dbContext.VideoGames.FindAsync([query.Id], cancellationToken);
 
             if (videoGame is null)
             {
-                return null;
+                return VideoGameErrors.NotFound(query.Id);
             }
 
-            return new GetGameByIdResponse(videoGame.Id, videoGame.Title, videoGame.Genre, videoGame.ReleaseYear);
+            var response = new GetGameByIdResponse(
+                videoGame.Id,
+                videoGame.Title,
+                videoGame.Genre,
+                videoGame.ReleaseYear);
+
+            return Result.Success(response);
         }
     }
 
@@ -91,12 +102,6 @@ public static class GetGameById
     public static async Task<IResult> Endpoint(ISender sender, int id, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new GetGameByIdQuery(id), cancellationToken);
-
-        if (result is null)
-        {
-            return Results.NotFound($"Video game with id {id} not found.");
-        }
-
-        return Results.Ok(result);
+        return result.Match(Results.Ok, CustomResults.Problem);
     }
 }

@@ -1,4 +1,5 @@
-﻿using Infrastructure.Database;
+﻿using DomainKernel;
+using Infrastructure.Database;
 using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -35,7 +36,7 @@ public static class GetAllGames
     /// 将来的にフィルタリングやソート機能を追加する場合は、
     /// プロパティを追加して拡張可能。
     /// </remarks>
-    public record GetAllGamesQuery : IRequest<IEnumerable<GetAllGamesResponse>>;
+    public record GetAllGamesQuery : IRequest<Result<IEnumerable<GetAllGamesResponse>>>;
 
     /// <summary>
     /// ゲーム情報レスポンス（一覧用）
@@ -53,22 +54,27 @@ public static class GetAllGames
     /// <summary>
     /// クエリハンドラ（一覧取得処理実行）
     /// </summary>
-    public class Handler(VideoGameDbContext dbContext) : IRequestHandler<GetAllGamesQuery, IEnumerable<GetAllGamesResponse>>
+    public class Handler(VideoGameDbContext dbContext)
+        : IRequestHandler<GetAllGamesQuery, Result<IEnumerable<GetAllGamesResponse>>>
     {
         /// <summary>
         /// 全ゲーム情報を取得
         /// </summary>
-        /// <param name="query">一覧取得クエリ</param>
+        /// <param name="_">一覧取得クエリ</param>
         /// <param name="cancellationToken">キャンセルトークン</param>
         /// <returns>全ゲーム情報のコレクション</returns>
         /// <remarks>
         /// ToListAsync()により、データベースへの1回のクエリで全データを取得。
         /// その後、メモリ上でEntity→Response DTOへのマッピングを実行。
         /// </remarks>
-        public async Task<IEnumerable<GetAllGamesResponse>> Handle(GetAllGamesQuery query, CancellationToken cancellationToken)
+        public async Task<Result<IEnumerable<GetAllGamesResponse>>> Handle(GetAllGamesQuery _, CancellationToken cancellationToken)
         {
             var videoGames = await dbContext.VideoGames.ToListAsync(cancellationToken);
-            return videoGames.Select(vg => new GetAllGamesResponse(vg.Id, vg.Title, vg.Genre, vg.ReleaseYear));
+
+            var response = videoGames.Select(vg =>
+                new GetAllGamesResponse(vg.Id, vg.Title, vg.Genre, vg.ReleaseYear));
+
+            return Result.Success(response);
         }
     }
 

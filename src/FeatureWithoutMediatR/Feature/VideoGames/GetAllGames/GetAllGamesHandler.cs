@@ -1,6 +1,7 @@
-﻿using Infrastructure.Database;
+﻿using DomainKernel;
+using FeatureShared.Messaging;
+using Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
-using Shared.Messaging;
 
 namespace FeatureWithoutMediatR.Feature.VideoGames.GetAllGames;
 
@@ -20,9 +21,15 @@ internal sealed class GetAllGamesHandler(VideoGameDbContext dbContext)
     /// ToListAsync()により、データベースへの1回のクエリで全データを取得。
     /// その後、メモリ上でEntity→Response DTOへのマッピングを実行。
     /// </remarks>
-    public async Task<IEnumerable<GetAllGamesResponse>> Handle(GetAllGamesQuery _, CancellationToken cancellationToken)
+    public async Task<Result<IEnumerable<GetAllGamesResponse>>> Handle(
+        GetAllGamesQuery _,
+        CancellationToken cancellationToken)
     {
         var videoGames = await dbContext.VideoGames.ToListAsync(cancellationToken);
-        return videoGames.Select(vg => new GetAllGamesResponse(vg.Id, vg.Title, vg.Genre, vg.ReleaseYear));
+
+        var getAllGames = videoGames.Select(vg => 
+            new GetAllGamesResponse(vg.Id, vg.Title, vg.Genre, vg.ReleaseYear));
+        
+        return Result.Success(getAllGames);
     }
 }

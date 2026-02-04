@@ -1,5 +1,7 @@
-﻿using MediatR;
+﻿using DomainKernel;
+using MediatR;
 using Microsoft.Extensions.Logging;
+using Serilog.Context;
 using System.Diagnostics;
 
 namespace FeatureWithMediatR.Behaivors;
@@ -38,8 +40,9 @@ namespace FeatureWithMediatR.Behaivors;
 /// </remarks>
 public class LoggingBehavior<TRequest, TResponse>(
     ILogger<LoggingBehavior<TRequest, TResponse>> logger)
-    : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : notnull
+        : IPipelineBehavior<TRequest, TResponse>
+        where TRequest : notnull
+        where TResponse : Result
 {
     /// <summary>
     /// MediatR パイプラインでの処理実行
@@ -92,17 +95,31 @@ public class LoggingBehavior<TRequest, TResponse>(
 
             stopwatch.Stop();
 
-            // リクエスト成功ログ
-            // {@Response} で構造化ログとして記録
-            if (logger.IsEnabled(LogLevel.Information))
+
+            if (response.IsSuccess)
             {
-                logger.LogInformation(
-                    "Handled {RequestName} [{RequestGuid}] in {ElapsedMilliseconds}ms {@Response}",
-                    requestName,
-                    requestGuid,
-                    stopwatch.ElapsedMilliseconds,
-                    response);
+                if (logger.IsEnabled(LogLevel.Information))
+                    logger.LogInformation("Completed command {Command}", requestName);
             }
+            else
+            {
+                using (LogContext.PushProperty("Error", response.Error, true))
+                {
+                    logger.LogError("Completed command {Command} with error", requestName);
+                }
+            }
+
+            //// リクエスト成功ログ
+            //// {@Response} で構造化ログとして記録
+            //if (logger.IsEnabled(LogLevel.Information))
+            //{
+            //    logger.LogInformation(
+            //        "Handled {RequestName} [{RequestGuid}] in {ElapsedMilliseconds}ms {@Response}",
+            //        requestName,
+            //        requestGuid,
+            //        stopwatch.ElapsedMilliseconds,
+            //        response);
+            //}
         }
         catch (Exception ex)
         {

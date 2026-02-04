@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using DomainKernel;
+using FluentValidation;
 using MediatR;
 
 namespace FeatureWithMediatR.Behaivors;
@@ -19,6 +20,7 @@ public class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TReq
     : IPipelineBehavior<TRequest, TResponse>
     // TRequest は null 不可（ValidationContext が null を想定していないため）
     where TRequest : notnull
+    where TResponse : Result
 {
     /// <summary>
     /// MediatR が Request を処理するたびに必ず呼ばれるメソッド

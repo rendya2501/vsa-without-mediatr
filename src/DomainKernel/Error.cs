@@ -1,4 +1,4 @@
-﻿namespace Domain.Kernel;
+﻿namespace DomainKernel;
 
 public record Error
 {

@@ -1,5 +1,7 @@
-﻿using Infrastructure.Database;
-using Shared.Messaging;
+﻿using Domain.VideoGame;
+using DomainKernel;
+using FeatureShared.Messaging;
+using Infrastructure.Database;
 
 namespace FeatureWithoutMediatR.Feature.VideoGames.UpdateGame;
 
@@ -7,7 +9,7 @@ namespace FeatureWithoutMediatR.Feature.VideoGames.UpdateGame;
 /// コマンドハンドラ（更新処理実行）
 /// </summary>
 internal sealed class UpdateGameHandler(VideoGameDbContext dbContext)
-    : ICommandHandler<UpdateGameCommand, UpdateGameResponse?>
+    : ICommandHandler<UpdateGameCommand, UpdateGameResponse>
 {
     /// <summary>
     /// ゲーム更新処理を実行
@@ -19,13 +21,14 @@ internal sealed class UpdateGameHandler(VideoGameDbContext dbContext)
     /// EF Coreの変更追跡により、プロパティ変更後のSaveChangesAsyncで
     /// 自動的にUPDATE文が発行される。
     /// </remarks>
-    public async Task<UpdateGameResponse?> Handle(UpdateGameCommand command, CancellationToken cancellationToken)
+    public async Task<Result<UpdateGameResponse>> Handle(UpdateGameCommand command, CancellationToken cancellationToken)
     {
         var videoGame = await dbContext.VideoGames.FindAsync([command.Id], cancellationToken);
 
         if (videoGame is null)
         {
-            return null;
+            // return Result.Failure(VideoGameErrors.NotFound(command.Id));
+            return VideoGameErrors.NotFound(command.Id);
         }
 
         videoGame.Title = command.Title;
@@ -34,6 +37,12 @@ internal sealed class UpdateGameHandler(VideoGameDbContext dbContext)
 
         await dbContext.SaveChangesAsync(cancellationToken);
 
-        return new UpdateGameResponse(videoGame.Id, videoGame.Title, videoGame.Genre, videoGame.ReleaseYear);
+        var response = new UpdateGameResponse(
+            videoGame.Id,
+            videoGame.Title,
+            videoGame.Genre,
+            videoGame.ReleaseYear);
+
+        return Result.Success(response);
     }
 }

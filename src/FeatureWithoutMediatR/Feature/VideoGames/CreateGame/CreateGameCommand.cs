@@ -1,6 +1,6 @@
-﻿using FeatureWithoutMediatR.Constants;
+﻿using Domain.VideoGame;
+using FeatureShared.Messaging;
 using FluentValidation;
-using Shared.Messaging;
 
 namespace FeatureWithoutMediatR.Feature.VideoGames.CreateGame;
 
@@ -34,16 +34,16 @@ internal sealed record CreateGameCommand(
             // タイトルは必須 & 最大文字数
             RuleFor(x => x.Title)
                 .NotEmpty()// .WithMessage("Title is required.")
-                .MaximumLength(VideoGameConstants.Validation.Title.MaxLength);// .WithMessage("Length is Max100.");
+                .MaximumLength(VideoGameValidationRules.Title.MaxLength);// .WithMessage("Length is Max100.");
 
             // ジャンルは必須 & 最大文字数
             RuleFor(x => x.Genre)
                 .NotEmpty()
-                .MaximumLength(VideoGameConstants.Validation.Genre.MaxLength);
+                .MaximumLength(VideoGameValidationRules.Genre.MaxLength);
 
             // リリース年は現実的な範囲に制限
             RuleFor(x => x.ReleaseYear)
-                .InclusiveBetween(VideoGameConstants.Validation.ReleaseYear.MinValue, DateTime.Now.Year);
+                .InclusiveBetween(VideoGameValidationRules.ReleaseYear.MinValue, DateTime.Now.Year);
         }
     }
 }

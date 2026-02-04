@@ -1,4 +1,8 @@
-﻿using FluentValidation;
+﻿using Domain.VideoGame;
+using DomainKernel;
+using FeatureShared.Extensions;
+using FeatureShared.Infrastructure;
+using FluentValidation;
 using Infrastructure.Database;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -40,7 +44,10 @@ public static class UpdateGame
     /// Idはルートパラメータから取得するため、ボディには含めない。
     /// CreateGameRequestと構造を合わせることで、API仕様の一貫性を保つ。
     /// </remarks>
-    public record UpdateGameRequest(string Title, string Genre, int ReleaseYear = VideoGameConstants.Validation.ReleaseYear.DefaultValue);
+    public record UpdateGameRequest(
+        string Title,
+        string Genre,
+        int ReleaseYear = VideoGameValidationRules.ReleaseYear.DefaultValue);
 
     /// <summary>
     /// ゲーム更新コマンド（内部処理用）
@@ -53,7 +60,11 @@ public static class UpdateGame
     /// ルートパラメータとリクエストボディを結合したコマンド。
     /// ValidationBehaviorにより自動的にValidatorが適用される。
     /// </remarks>
-    public record UpdateGameCommand(int Id, string Title, string Genre, int ReleaseYear) : IRequest<UpdateGameResponse?>;
+    public record UpdateGameCommand(
+        int Id,
+        string Title,
+        string Genre,
+        int ReleaseYear) : IRequest<Result<UpdateGameResponse>>;
 
     /// <summary>
     /// ゲーム更新レスポンス
@@ -65,7 +76,11 @@ public static class UpdateGame
     /// <remarks>
     /// 更新後の完全な情報を返却することで、クライアント側での再取得を不要にする。
     /// </remarks>
-    public record UpdateGameResponse(int Id, string Title, string Genre, int ReleaseYear);
+    public record UpdateGameResponse(
+        int Id,
+        string Title,
+        string Genre,
+        int ReleaseYear);
 
     /// <summary>
     /// コマンド検証ルール
@@ -81,23 +96,24 @@ public static class UpdateGame
             // タイトルは必須 & 最大文字数
             RuleFor(x => x.Title)
                 .NotEmpty()
-                .MaximumLength(VideoGameConstants.Validation.Title.MaxLength);
+                .MaximumLength(VideoGameValidationRules.Title.MaxLength);
 
             // ジャンルは必須 & 最大文字数
             RuleFor(x => x.Genre)
                 .NotEmpty()
-                .MaximumLength(VideoGameConstants.Validation.Genre.MaxLength);
+                .MaximumLength(VideoGameValidationRules.Genre.MaxLength);
 
             // リリース年は現実的な範囲に制限
             RuleFor(x => x.ReleaseYear)
-                .InclusiveBetween(VideoGameConstants.Validation.ReleaseYear.MinValue, DateTime.Now.Year);
+                .InclusiveBetween(VideoGameValidationRules.ReleaseYear.MinValue, DateTime.Now.Year);
         }
     }
 
     /// <summary>
     /// コマンドハンドラ（更新処理実行）
     /// </summary>
-    public class Handler(VideoGameDbContext dbContext) : IRequestHandler<UpdateGameCommand, UpdateGameResponse?>
+    public class Handler(VideoGameDbContext dbContext)
+        : IRequestHandler<UpdateGameCommand, Result<UpdateGameResponse>>
     {
         /// <summary>
         /// ゲーム更新処理を実行
@@ -109,13 +125,13 @@ public static class UpdateGame
         /// EF Coreの変更追跡により、プロパティ変更後のSaveChangesAsyncで
         /// 自動的にUPDATE文が発行される。
         /// </remarks>
-        public async Task<UpdateGameResponse?> Handle(UpdateGameCommand command, CancellationToken cancellationToken)
+        public async Task<Result<UpdateGameResponse>> Handle(UpdateGameCommand command, CancellationToken cancellationToken)
         {
             var videoGame = await dbContext.VideoGames.FindAsync([command.Id], cancellationToken);
 
             if (videoGame is null)
             {
-                return null;
+                return VideoGameErrors.NotFound(command.Id);
             }
 
             videoGame.Title = command.Title;
@@ -123,7 +139,10 @@ public static class UpdateGame
             videoGame.ReleaseYear = command.ReleaseYear;
 
             await dbContext.SaveChangesAsync(cancellationToken);
-            return new UpdateGameResponse(videoGame.Id, videoGame.Title, videoGame.Genre, videoGame.ReleaseYear);
+
+            var result = new UpdateGameResponse(videoGame.Id, videoGame.Title, videoGame.Genre, videoGame.ReleaseYear);
+
+            return Result.Success(result);
         }
     }
 
@@ -142,13 +161,9 @@ public static class UpdateGame
     public static async Task<IResult> Endpoint(ISender sender, int id, UpdateGameRequest request, CancellationToken cancellationToken)
     {
         var command = new UpdateGameCommand(id, request.Title, request.Genre, request.ReleaseYear);
-        var result = await sender.Send(command , cancellationToken);
 
-        if (result is null)
-        {
-            return Results.NotFound($"Video game with id {id} not found.");
-        }
+        var result = await sender.Send(command, cancellationToken);
 
-        return Results.Ok(result);
+        return result.Match(Results.Ok, CustomResults.Problem);
     }
 }

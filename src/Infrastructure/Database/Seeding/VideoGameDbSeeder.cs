@@ -1,4 +1,4 @@
-﻿using Domain.Entities;
+﻿using Domain.VideoGame;
 
 namespace Infrastructure.Database.Seeding;
 

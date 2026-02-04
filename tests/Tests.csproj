@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\DomainKernel\Domain.Kernel.csproj" />
+    <ProjectReference Include="..\src\DomainKernel\DomainKernel.csproj" />
     <ProjectReference Include="..\src\Domain\Domain.csproj" />
     <ProjectReference Include="..\src\FeatureWithMediatR\FeatureWithMediatR.csproj" />
     <ProjectReference Include="..\src\FeatureWithoutMediatR\FeatureWithoutMediatR.csproj" />

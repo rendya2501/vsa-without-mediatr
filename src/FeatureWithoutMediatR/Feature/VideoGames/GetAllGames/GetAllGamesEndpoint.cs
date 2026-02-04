@@ -1,10 +1,12 @@
 ﻿using Carter;
+using FeatureShared.Extensions;
+using FeatureShared.Infrastructure;
+using FeatureShared.Messaging;
 using FeatureWithoutMediatR.Constants;
 using FeatureWithoutMediatR.Extension;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
-using Shared.Messaging;
 
 namespace FeatureWithoutMediatR.Feature.VideoGames.GetAllGames;
 
@@ -18,9 +20,9 @@ public sealed class GetAllGamesEndpoint2 : ICarterModule
                 CancellationToken cancellationToken) =>
             {
                 var result = await handler.Handle(new GetAllGamesQuery(), cancellationToken);
-                return Results.Ok(result);
+                return result.Match(Results.Ok, CustomResults.Problem);
             })
-            .WithName(VideoGameConstants.RouteNames.GetAll)
+            .WithName(VideoGameRounteNames.GetAll)
             //.WithSummary("Get all video games")
             .WithDescription("Retrieves a list of all video games in the database")
             .Produces<IEnumerable<GetAllGamesResponse>>(StatusCodes.Status200OK);

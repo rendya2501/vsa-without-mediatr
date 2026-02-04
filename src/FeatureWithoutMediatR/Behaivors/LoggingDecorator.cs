@@ -1,69 +1,40 @@
-﻿//using Microsoft.Extensions.Logging;
-//using System.Diagnostics;
+﻿using DomainKernel;
+using FeatureShared.Messaging;
+using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 
-//namespace FeatureWithoutMediatR.Behaivors;
+namespace FeatureWithoutMediatR.Behaivors;
 
-///// <summary>
-///// MediatR の Pipeline Behavior（Serilogロギング処理）
-///// </summary>
-///// <typeparam name="TRequest">MediatR の Request 型</typeparam>
-///// <typeparam name="TResponse">MediatR の Response 型</typeparam>
-///// <remarks>
-///// <para>
-///// すべての Request/Response を自動的にログに記録する横断的関心事。
-///// ValidationBehavior と同様に、Handler の前後で実行される。
-///// </para>
-///// <para>
-///// <strong>処理フロー:</strong><br/>
-///// 1. リクエスト開始時刻とGUIDを記録<br/>
-///// 2. リクエスト内容を構造化ログとして記録<br/>
-///// 3. 次の処理（Validation → Handler）を実行<br/>
-///// 4. レスポンス内容と実行時間を記録<br/>
-///// 5. エラー発生時は例外情報を記録
-///// </para>
-///// <para>
-///// <strong>Serilogの構造化ログ:</strong><br/>
-///// {@Request} のように @ を使用することで、
-///// オブジェクトが構造化されたプロパティとしてログに記録される。
-///// これにより、Seq、Elasticsearch、Splunk などで検索可能になる。
-///// </para>
-///// <para>
-///// <strong>ログ出力例:</strong><br/>
-///// <code>
-///// [14:23:45 INF] Handling CreateGameCommand [a3f2b1c8] {@Request}
-///// [14:23:45 INF] Handled CreateGameCommand [a3f2b1c8] in 45ms {@Response}
-///// </code>
-///// </para>
-///// </remarks>
+internal static class LoggingDecorator
+{
+    internal sealed class QueryHandler<TQuery, TResponse> : IQueryHandler<TQuery, TResponse>
+        where TQuery : IQuery<TResponse>
+    {
+        public Task<Result<TResponse>> Handle(TQuery query, CancellationToken cancellationToken = default)
+        {
+            throw new NotImplementedException();
+        }
+    }
+}
+
 //public class LoggingDecorator<TRequest, TResponse>(
 //    ILogger<LoggingDecorator<TRequest, TResponse>> logger)
 //    : IPipelineBehavior<TRequest, TResponse>
-//    where TRequest : notnull
+//    where TRequest : class
+//    where TResponse : Result
 //{
-//    /// <summary>
-//    /// MediatR パイプラインでの処理実行
-//    /// </summary>
-//    /// <param name="request">実際に送信された Command / Query</param>
-//    /// <param name="next">次の処理（次の Behavior or 最終的な Handler）</param>
-//    /// <param name="cancellationToken">キャンセルトークン</param>
-//    /// <returns>Handler からの Response</returns>
-//    /// <remarks>
-//    /// <para>
-//    /// リクエスト単位でGUIDを生成することで、
-//    /// 分散ログ環境でも同一リクエストのログを追跡可能にする。
-//    /// </para>
-//    /// <para>
-//    /// Serilogの構造化ログを活用し、{@Request} / {@Response} として
-//    /// オブジェクト全体を記録することで、Seq等での高度な検索を実現。
-//    /// </para>
-//    /// </remarks>
 //    public async Task<TResponse> Handle(
 //        TRequest request,
 //        RequestHandlerDelegate<TResponse> next,
 //        CancellationToken cancellationToken)
 //    {
+//        // リクエスト名
 //        var requestName = typeof(TRequest).Name;
-//        var requestGuid = Guid.NewGuid().ToString("N")[..8]; // 短縮GUID (8文字)
+//        // 短縮GUID (8文字)                                                          
+//        var requestGuid = Guid.NewGuid().ToString("N")[..8];
+//        // 機密情報をマスク
+//        var sanitizedRequest = SanitizeRequest(request);
+//        // 処理時間を計測
 //        var stopwatch = Stopwatch.StartNew();
 
 //        // リクエスト開始ログ
@@ -74,7 +45,7 @@
 //                "Handling {RequestName} [{RequestGuid}] {@Request}",
 //                requestName,
 //                requestGuid,
-//                request);
+//                sanitizedRequest);
 //        }
 
 //        TResponse response;
@@ -116,5 +87,28 @@
 //        }
 
 //        return response;
+//    }
+
+//    /// <summary>
+//    /// リクエスト内容をマスク
+//    /// </summary>
+//    /// <param name="request">リクエスト</param>
+//    /// <returns>マスクされたリクエスト内容</returns>
+//    private static Dictionary<string, object?> SanitizeRequest(TRequest request)
+//    {
+//        // プロパティ名に "Password", "Secret", "Token" が含まれる場合はマスク
+//        var properties = typeof(TRequest).GetProperties()
+//            .Select(p => new
+//            {
+//                Name = p.Name,
+//                Value = p.Name.Contains("Password", StringComparison.OrdinalIgnoreCase) ||
+//                        p.Name.Contains("Secret", StringComparison.OrdinalIgnoreCase) ||
+//                        p.Name.Contains("Token", StringComparison.OrdinalIgnoreCase)
+//                    ? "***REDACTED***"
+//                    : p.GetValue(request)
+//            })
+//            .ToDictionary(x => x.Name, x => x.Value);
+
+//        return properties;
 //    }
 //}

@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace Domain.Kernel;
+namespace DomainKernel;
 
 /// <summary>
 /// 操作結果を表現する基底型（classベース）
@@ -90,5 +90,5 @@ public class Result<T>(T? value, bool isSuccess, Error? error) : Result(isSucces
     /// <summary>
     /// 値からの暗黙的変換
     /// </summary>
-    public static implicit operator Result<T>(T value) => Success(value);
+    // public static implicit operator Result<T>(T value) => Success(value);
 }

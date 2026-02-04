@@ -1,6 +1,7 @@
-﻿using FeatureWithoutMediatR.Constants;
+﻿using Domain.VideoGame;
+using FeatureShared.Messaging;
+using FeatureWithoutMediatR.Constants;
 using FluentValidation;
-using Shared.Messaging;
 
 namespace FeatureWithoutMediatR.Feature.VideoGames.UpdateGame;
 
@@ -19,7 +20,7 @@ internal sealed record UpdateGameCommand(
     int Id,
     string Title,
     string Genre,
-    int ReleaseYear) : ICommand<UpdateGameResponse?>
+    int ReleaseYear) : ICommand<UpdateGameResponse>
 {
     /// <summary>
     /// コマンド検証ルール
@@ -35,16 +36,16 @@ internal sealed record UpdateGameCommand(
             // タイトルは必須 & 最大文字数
             RuleFor(x => x.Title)
                 .NotEmpty()
-                .MaximumLength(VideoGameConstants.Validation.Title.MaxLength);
+                .MaximumLength(VideoGameValidationRules.Title.MaxLength);
 
             // ジャンルは必須 & 最大文字数
             RuleFor(x => x.Genre)
                 .NotEmpty()
-                .MaximumLength(VideoGameConstants.Validation.Genre.MaxLength);
+                .MaximumLength(VideoGameValidationRules.Genre.MaxLength);
 
             // リリース年は現実的な範囲に制限
             RuleFor(x => x.ReleaseYear)
-                .InclusiveBetween(VideoGameConstants.Validation.ReleaseYear.MinValue, DateTime.Now.Year);
+                .InclusiveBetween(VideoGameValidationRules.ReleaseYear.MinValue, DateTime.Now.Year);
         }
     }
 }
