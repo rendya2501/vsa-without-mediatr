@@ -1,4 +1,6 @@
 ﻿using DomainKernel;
+using FeatureShared.Extensions;
+using FeatureShared.Infrastructure;
 using Infrastructure.Database;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -90,6 +92,6 @@ public static class GetAllGames
     public static async Task<IResult> Endpoint(ISender sender, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new GetAllGamesQuery(), cancellationToken);
-        return Results.Ok(result);
+        return result.Match(Results.Ok, CustomResults.Problem);
     }
 }
