@@ -1,4 +1,5 @@
 ﻿using Carter;
+using Web.Api.Endpoints;
 using Domain.VideoGame;
 using FeatureShared.Extensions;
 using MediatR;
@@ -45,10 +46,10 @@ public sealed class CreateGameEndpoint : ICarterModule
 
                 // 201 Created + Location ヘッダ付きレスポンス
                 return result.ToCreatedAtRoute(
-                    routeName: VideoGameRounteNames.GetById,
+                    routeName: VideoGameRouteNames.WithMediatR.GetById,
                     routeValuesSelector: response => new { id = response.Id });
             })
-            .WithName(VideoGameRounteNames.Create)
+            .WithName(VideoGameRouteNames.WithMediatR.Create)
             //.WithSummary("Create a new video game")
             .WithDescription("Creates a new video game entry in the database")
             .ProducesValidationProblem()

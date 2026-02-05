@@ -1,4 +1,5 @@
 ﻿using Carter;
+using Web.Api.Endpoints;
 using Domain.VideoGame;
 using FeatureShared.Extensions;
 using FeatureShared.Messaging;
@@ -44,10 +45,10 @@ public sealed class CreateGameEndpoint : ICarterModule
                 var result = await handler.Handle(command, cancellationToken);
 
                 return result.ToCreatedAtRoute(
-                    routeName: VideoGameRounteNames.GetById,
+                    routeName: VideoGameRouteNames.WithoutMediatR.GetById,
                     routeValuesSelector: response => new { id = response.Id });
             })
-            .WithName(VideoGameRounteNames.Create)
+            .WithName(VideoGameRouteNames.WithoutMediatR.Create)
             //.WithSummary("Create a new video game")
             .WithDescription("Creates a new video game entry in the database")
             .ProducesValidationProblem()
