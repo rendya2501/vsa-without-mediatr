@@ -1,4 +1,5 @@
 ﻿using Carter;
+using Web.Api.Endpoints;
 using FeatureShared.Extensions;
 using FeatureShared.Messaging;
 using FeatureWithoutMediatR.Feature.VideoGames.GetGameById;
@@ -18,7 +19,7 @@ public sealed class GetGameByIdEndpoint : ICarterModule
                 var result = await handler.Handle(new GetGameByIdQuery(id), cancellationToken);
                 return result.ToOk();
             })
-            .WithName(VideoGameRouteNames.GetById)
+            .WithName(VideoGameRouteNames.WithoutMediatR.GetById)
             //.WithSummary("Get a video game by ID")
             .WithDescription("Retrieves a specific video game by its ID")
             .Produces<GetGameByIdResponse>(StatusCodes.Status200OK)

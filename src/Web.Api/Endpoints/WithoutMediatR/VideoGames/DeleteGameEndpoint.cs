@@ -1,4 +1,5 @@
 ﻿using Carter;
+using Web.Api.Endpoints;
 using FeatureShared.Extensions;
 using FeatureShared.Messaging;
 using FeatureWithoutMediatR.Feature.VideoGames.DeleteGame;
@@ -18,7 +19,7 @@ public sealed class DeleteGameEndpoint : ICarterModule
                 var result = await handler.Handle(new DeleteGameCommand(id), cancellationToken);
                 return result.ToNoContent();
             })
-            .WithName(VideoGameRouteNames.Delete)
+            .WithName(VideoGameRouteNames.WithoutMediatR.Delete)
             //.WithSummary("Delete a video game")
             .WithDescription("Deletes a video game by its ID")
             .Produces(StatusCodes.Status204NoContent)

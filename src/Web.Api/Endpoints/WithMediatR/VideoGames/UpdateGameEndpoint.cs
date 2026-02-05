@@ -1,4 +1,5 @@
 ﻿using Carter;
+using Web.Api.Endpoints;
 using Domain.VideoGame;
 using FeatureShared.Extensions;
 using MediatR;
@@ -38,7 +39,7 @@ public sealed class UpdateGameEndpoint : ICarterModule
 
                 return result.ToOk();
             })
-            .WithName(VideoGameRouteNames.Update)
+            .WithName(VideoGameRouteNames.WithMediatR.Update)
             //.WithSummary("Update an existing video game")
             .WithDescription("Updates an existing video game by its ID")
             .Produces<UpdateGameResponse>(StatusCodes.Status200OK)
