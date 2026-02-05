@@ -45,10 +45,10 @@ public sealed class CreateGameEndpoint : ICarterModule
 
                 // 201 Created + Location ヘッダ付きレスポンス
                 return result.ToCreatedAtRoute(
-                    routeName: VideoGameRounteNames.GetById,
+                    routeName: VideoGameRouteNames.GetById,
                     routeValuesSelector: response => new { id = response.Id });
             })
-            .WithName(VideoGameRounteNames.Create)
+            .WithName(VideoGameRouteNames.Create)
             //.WithSummary("Create a new video game")
             .WithDescription("Creates a new video game entry in the database")
             .ProducesValidationProblem()

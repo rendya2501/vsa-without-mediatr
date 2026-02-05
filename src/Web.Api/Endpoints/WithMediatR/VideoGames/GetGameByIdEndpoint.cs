@@ -18,7 +18,7 @@ public sealed class GetGameByIdEndpoint : ICarterModule
                 var result = await sender.Send(new GetGameByIdQuery(id), cancellationToken);
                 return result.ToOk();
             })
-            .WithName(VideoGameRounteNames.GetById)
+            .WithName(VideoGameRouteNames.GetById)
             //.WithSummary("Get a video game by ID")
             .WithDescription("Retrieves a specific video game by its ID")
             .Produces<GetGameByIdResponse>(StatusCodes.Status200OK)
