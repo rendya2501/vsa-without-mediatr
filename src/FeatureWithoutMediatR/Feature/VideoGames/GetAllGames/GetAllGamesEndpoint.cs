@@ -13,7 +13,7 @@ public sealed class GetAllGamesEndpoint2 : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapApiGroup("/api/games2", "WithoutMediatR")
+        app.MapWithoutMediatRGamesApi()
             .MapGet("/", async (
                 IQueryHandler<GetAllGamesQuery, IEnumerable<GetAllGamesResponse>> handler,
                 CancellationToken cancellationToken) =>

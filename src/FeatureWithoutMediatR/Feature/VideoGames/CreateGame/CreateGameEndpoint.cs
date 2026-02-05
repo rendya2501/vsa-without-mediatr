@@ -33,7 +33,7 @@ public sealed class CreateGameEndpoint : ICarterModule
     /// <param name="app"></param>
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapApiGroup("/api/games2", "WithoutMediatR")
+        app.MapWithoutMediatRGamesApi()
             .MapPost("/", async (
                 CreateGameRequest request,
                 ICommandHandler<CreateGameCommand, CreateGameResponse> handler,

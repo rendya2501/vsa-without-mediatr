@@ -29,7 +29,7 @@ public sealed class UpdateGameEndpoint : ICarterModule
 
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapApiGroup("/api/games2", "WithoutMediatR")
+        app.MapWithoutMediatRGamesApi()
             .MapPut("/{id:int}", async (
                 int id,
                 UpdateGameRequest request,

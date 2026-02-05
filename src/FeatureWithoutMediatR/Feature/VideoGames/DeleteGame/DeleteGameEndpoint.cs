@@ -13,7 +13,7 @@ public sealed class DeleteGameEndpoint : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapApiGroup("/api/games2", "WithoutMediatR")
+        app.MapWithoutMediatRGamesApi()
             .MapDelete("/{id:int}", async (
                 int id,
                 ICommandHandler<DeleteGameCommand> handler,
