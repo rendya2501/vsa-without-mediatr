@@ -1,6 +1,5 @@
 ﻿using Carter;
 using FeatureShared.Extensions;
-using FeatureShared.Infrastructure;
 using FeatureShared.Messaging;
 using FeatureWithoutMediatR.Constants;
 using FeatureWithoutMediatR.Extension;
@@ -21,7 +20,7 @@ public sealed class DeleteGameEndpoint : ICarterModule
                 CancellationToken cancellationToken) =>
             {
                 var result = await handler.Handle(new DeleteGameCommand(id), cancellationToken);
-                return result.Match(Results.NoContent, CustomResults.Problem);
+                return result.ToNoContent();
             })
             .WithName(VideoGameRounteNames.Delete)
             //.WithSummary("Delete a video game")

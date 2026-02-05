@@ -27,8 +27,10 @@ try
     // 拡張メソッドでSerilog設定
     builder.Host.ConfigureSerilog();
 
+    // OpenAPI
     builder.Services.AddOpenApi();
 
+    // Featureの登録
     builder.Services
         .AddFeatureWithMediatR()
         .AddFeatureWithoutMediatR();
@@ -81,14 +83,16 @@ try
         await dbContext.Database.EnsureCreatedAsync();
     }
 
+    // HTTPSリダイレクト
     app.UseHttpsRedirection();
 
     // 例外ハンドリング
     app.UseExceptionHandler();
-
-    // エンドポイント登録
+    
+    // Carterのエンドポイント登録
     app.MapCarter();
 
+    // アプリケーションの起動
     Log.Information("Application started successfully");
     app.Run();
 }

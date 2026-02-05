@@ -1,7 +1,6 @@
 ﻿using Carter;
 using Domain.VideoGame;
 using FeatureShared.Extensions;
-using FeatureShared.Infrastructure;
 using FeatureShared.Messaging;
 using FeatureWithoutMediatR.Constants;
 using FeatureWithoutMediatR.Extension;
@@ -41,7 +40,7 @@ public sealed class UpdateGameEndpoint : ICarterModule
 
                 var result = await handler.Handle(command, cancellationToken);
 
-                return result.Match(Results.Ok, CustomResults.Problem);
+                return result.ToOk();
             })
             .WithName(VideoGameRounteNames.Update)
             //.WithSummary("Update an existing video game")

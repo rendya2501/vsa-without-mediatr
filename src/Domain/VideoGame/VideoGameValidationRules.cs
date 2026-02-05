@@ -1,7 +1,7 @@
 ﻿namespace Domain.VideoGame;
 
 /// <summary>
-/// バリデーションルール定数
+/// ビデオゲームバリデーションルール定数
 /// </summary>
 public static class VideoGameValidationRules
 {

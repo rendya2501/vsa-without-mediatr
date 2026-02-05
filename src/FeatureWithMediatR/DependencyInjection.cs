@@ -4,8 +4,16 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace FeatureWithMediatR;
 
+/// <summary>
+/// 依存性注入の設定クラス
+/// </summary>
 public static class DependencyInjection
 {
+    /// <summary>
+    /// FeatureWithMediatR の依存性注入の設定
+    /// </summary>
+    /// <param name="services">IServiceCollection</param>
+    /// <returns>IServiceCollection</returns>
     public static IServiceCollection AddFeatureWithMediatR(this IServiceCollection services)
     {
         // MediatR の登録

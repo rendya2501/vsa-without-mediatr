@@ -1,4 +1,5 @@
 ﻿using Carter;
+using FeatureShared.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -23,7 +24,7 @@ public sealed class GetWeatherForecastEndpoint : ICarterModule
             CancellationToken cancellationToken) =>
         {
             var result = await sender.Send(new WeatherForecastQuery(), cancellationToken);
-            return Results.Ok(result);
+            return result.ToOk();
         })
         .WithTags("WithMediatR")
         //.WithName("GetWeatherForecast_MediatR")

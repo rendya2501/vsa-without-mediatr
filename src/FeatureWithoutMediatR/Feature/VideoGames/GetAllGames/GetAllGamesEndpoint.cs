@@ -1,6 +1,5 @@
 ﻿using Carter;
 using FeatureShared.Extensions;
-using FeatureShared.Infrastructure;
 using FeatureShared.Messaging;
 using FeatureWithoutMediatR.Constants;
 using FeatureWithoutMediatR.Extension;
@@ -20,7 +19,7 @@ public sealed class GetAllGamesEndpoint2 : ICarterModule
                 CancellationToken cancellationToken) =>
             {
                 var result = await handler.Handle(new GetAllGamesQuery(), cancellationToken);
-                return result.Match(Results.Ok, CustomResults.Problem);
+                return result.ToOk();
             })
             .WithName(VideoGameRounteNames.GetAll)
             //.WithSummary("Get all video games")

@@ -9,7 +9,7 @@ namespace FeatureWithMediatR.Features.VideoGames;
 /// <summary>
 /// Video Gamesに関連するすべてのエンドポイントを管理するモジュール
 /// </summary>
-public sealed class VideoGamesModule : ICarterModule
+public sealed class VideoGameEndpoints : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {

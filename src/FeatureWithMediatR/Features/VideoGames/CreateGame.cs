@@ -1,7 +1,6 @@
 ﻿using Domain.VideoGame;
 using DomainKernel;
 using FeatureShared.Extensions;
-using FeatureShared.Infrastructure;
 using FeatureWithMediatR.Constans;
 using FluentValidation;
 using Infrastructure.Database;
@@ -103,6 +102,7 @@ public static class CreateGame
                 .InclusiveBetween(VideoGameValidationRules.ReleaseYear.MinValue, DateTime.Now.Year);
         }
     }
+
     /// <summary>
     /// コマンドハンドラ（ビジネスロジック実行）
     /// </summary>
@@ -165,11 +165,8 @@ public static class CreateGame
         var result = await sender.Send(command, cancellationToken);
 
         // 201 Created + Location ヘッダ付きレスポンス
-        return result.Match(response =>
-            Results.CreatedAtRoute(
-                routeName: VideoGameRounteNames.GetById,
-                routeValues: new { id = response.Id },
-                value: response),
-            CustomResults.Problem);
+        return result.ToCreatedAtRoute(
+            routeName: VideoGameRounteNames.GetById,
+            routeValuesSelector: response => new { id = response.Id });
     }
 }

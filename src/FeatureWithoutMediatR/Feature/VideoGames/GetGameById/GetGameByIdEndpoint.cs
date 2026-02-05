@@ -1,6 +1,5 @@
 ﻿using Carter;
 using FeatureShared.Extensions;
-using FeatureShared.Infrastructure;
 using FeatureShared.Messaging;
 using FeatureWithoutMediatR.Constants;
 using FeatureWithoutMediatR.Extension;
@@ -21,7 +20,7 @@ public sealed class GetGameByIdEndpoint : ICarterModule
                 CancellationToken cancellationToken) =>
             {
                 var result = await handler.Handle(new GetGameByIdQuery(id), cancellationToken);
-                return result.Match(Results.Ok, CustomResults.Problem);
+                return result.ToOk();
             })
             .WithName(VideoGameRounteNames.GetById)
             //.WithSummary("Get a video game by ID")

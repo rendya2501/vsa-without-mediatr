@@ -1,7 +1,6 @@
 ﻿using Domain.VideoGame;
 using DomainKernel;
 using FeatureShared.Extensions;
-using FeatureShared.Infrastructure;
 using Infrastructure.Database;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -75,6 +74,6 @@ public static class DeleteGame
     public static async Task<IResult> Endpoint(ISender sender, int id, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new DeleteGameCommand(id), cancellationToken);
-        return result.Match(Results.NoContent, CustomResults.Problem);
+        return result.ToNoContent();
     }
 }

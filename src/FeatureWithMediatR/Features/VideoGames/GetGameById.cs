@@ -1,7 +1,6 @@
 ﻿using Domain.VideoGame;
 using DomainKernel;
 using FeatureShared.Extensions;
-using FeatureShared.Infrastructure;
 using Infrastructure.Database;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -102,6 +101,6 @@ public static class GetGameById
     public static async Task<IResult> Endpoint(ISender sender, int id, CancellationToken cancellationToken)
     {
         var result = await sender.Send(new GetGameByIdQuery(id), cancellationToken);
-        return result.Match(Results.Ok, CustomResults.Problem);
+        return result.ToOk();
     }
 }

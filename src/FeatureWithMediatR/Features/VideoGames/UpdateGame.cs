@@ -1,7 +1,6 @@
 ﻿using Domain.VideoGame;
 using DomainKernel;
 using FeatureShared.Extensions;
-using FeatureShared.Infrastructure;
 using FluentValidation;
 using Infrastructure.Database;
 using MediatR;
@@ -158,12 +157,16 @@ public static class UpdateGame
     /// PUT /api/games/{id} の形式で呼び出される。
     /// ルートパラメータとボディを結合してCommandを生成。
     /// </remarks>
-    public static async Task<IResult> Endpoint(ISender sender, int id, UpdateGameRequest request, CancellationToken cancellationToken)
+    public static async Task<IResult> Endpoint(
+        ISender sender, 
+        int id, 
+        UpdateGameRequest request, 
+        CancellationToken cancellationToken)
     {
         var command = new UpdateGameCommand(id, request.Title, request.Genre, request.ReleaseYear);
 
         var result = await sender.Send(command, cancellationToken);
 
-        return result.Match(Results.Ok, CustomResults.Problem);
+        return result.ToOk();
     }
 }
