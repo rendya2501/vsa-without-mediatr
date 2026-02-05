@@ -43,7 +43,7 @@ try
         else
         {
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-            // options.UseSqlServer(connectionString);
+            options.UseSqlServer(connectionString);
         }
     });
 
