@@ -18,7 +18,7 @@
     <ProjectReference Include="..\DomainKernel\DomainKernel.csproj" />
     <ProjectReference Include="..\Domain\Domain.csproj" />
     <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
-    <ProjectReference Include="..\Shared\FeatureShared.csproj" />
+    <ProjectReference Include="..\FeatureShared\FeatureShared.csproj" />
   </ItemGroup>
 
 </Project>

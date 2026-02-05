@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Shared\FeatureShared.csproj" />
+    <ProjectReference Include="..\FeatureShared\FeatureShared.csproj" />
     <ProjectReference Include="..\Infrastructure\Infrastructure.csproj" />
     <ProjectReference Include="..\DomainKernel\DomainKernel.csproj" />
   </ItemGroup>

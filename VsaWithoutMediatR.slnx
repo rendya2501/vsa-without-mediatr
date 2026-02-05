@@ -13,7 +13,7 @@
     <Project Path="src/FeatureWithMediatR/FeatureWithMediatR.csproj" />
     <Project Path="src/FeatureWithoutMediatR/FeatureWithoutMediatR.csproj" />
     <Project Path="src/Infrastructure/Infrastructure.csproj" />
-    <Project Path="src/Shared/FeatureShared.csproj" />
+    <Project Path="src/FeatureShared/FeatureShared.csproj" />
     <Project Path="src/Web.Api/Web.Api.csproj" />
   </Folder>
   <Folder Name="/tests/">
