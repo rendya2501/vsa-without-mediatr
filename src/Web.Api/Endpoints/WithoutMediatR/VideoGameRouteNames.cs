@@ -7,7 +7,7 @@
 /// OpenAPI/Scalarドキュメント、CreatedAtRouteなどで使用。
 /// ルート名を変更する場合はここを修正するだけで全体に反映される。
 /// </remarks>
-internal static class VideoGameRounteNames
+internal static class VideoGameRouteNames
 {
     /// <summary>全ゲーム一覧取得</summary>
     public const string GetAll = "GetAllGames2";

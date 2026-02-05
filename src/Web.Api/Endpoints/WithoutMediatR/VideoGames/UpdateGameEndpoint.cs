@@ -38,7 +38,7 @@ public sealed class UpdateGameEndpoint : ICarterModule
 
                 return result.ToOk();
             })
-            .WithName(VideoGameRounteNames.Update)
+            .WithName(VideoGameRouteNames.Update)
             //.WithSummary("Update an existing video game")
             .WithDescription("Updates an existing video game by its ID")
             .Produces<UpdateGameResponse>(StatusCodes.Status200OK)

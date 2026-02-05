@@ -15,7 +15,7 @@
 /// - (将来の拡張): Paths, CacheKeys, ErrorMessages など
 /// </para>
 /// </remarks>
-internal static class VideoGameRounteNames
+internal static class VideoGameRouteNames
 {
     /// <summary>全ゲーム一覧取得</summary>
     public const string GetAll = "GetAllGames";

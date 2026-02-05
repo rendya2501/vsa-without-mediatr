@@ -18,7 +18,7 @@ public sealed class DeleteGameEndpoint : ICarterModule
                 var result = await sender.Send(new DeleteGameCommand(id), cancellationToken);
                 return result.ToNoContent();
             })
-            .WithName(VideoGameRounteNames.Delete)
+            .WithName(VideoGameRouteNames.Delete)
             //.WithSummary("Delete a video game")
             .WithDescription("Deletes a video game by its ID")
             .Produces(StatusCodes.Status204NoContent)
