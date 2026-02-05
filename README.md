@@ -563,3 +563,4 @@ services.AddDbContext<VideoGameDbContext>(options =>
 
 - [YouTube_I Removed MediatR – Building Your Own CQRS Handlers in .NET](https://www.youtube.com/watch?v=j1OUToRyVHc)  
 - [YouTube_Building Your Own CQRS Pipeline With Decorators (Dropped MediatR!)](https://www.youtube.com/watch?v=gsluG8NdCfw)
+- [YouTube_Building a Custom Domain Events Dispatcher in .NET](https://www.youtube.com/watch?v=PPGLrllJs_U)
