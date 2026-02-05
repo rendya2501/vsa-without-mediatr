@@ -26,14 +26,14 @@ internal static class VideoGameRouteNames
     internal static class WithoutMediatR
     {
         /// <summary>全ゲーム一覧取得</summary>
-        public const string GetAll = "GetAllGames2";
+        public const string GetAll = "GetAllGamesWithoutMediatR";
         /// <summary>ID指定ゲーム取得</summary>
-        public const string GetById = "GetGameById2";
+        public const string GetById = "GetGameByIdWithoutMediatR";
         /// <summary>ゲーム作成</summary>
-        public const string Create = "CreateGame2";
+        public const string Create = "CreateGameWithoutMediatR";
         /// <summary>ゲーム更新</summary>
-        public const string Update = "UpdateGame2";
+        public const string Update = "UpdateGameWithoutMediatR";
         /// <summary>ゲーム削除</summary>
-        public const string Delete = "DeleteGame2";
+        public const string Delete = "DeleteGameWithoutMediatR";
     }
 }
