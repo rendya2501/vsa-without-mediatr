@@ -11,7 +11,7 @@
 /// Entityを直接公開せず、API専用のDTOとして定義。
 /// 将来的なEntity変更がAPIに影響しないよう分離している。
 /// </remarks>
-internal sealed record CreateGameResponse(
+public sealed record CreateGameResponse(
     int Id,
     string Title,
     string Genre,

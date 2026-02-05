@@ -1,9 +1,7 @@
 ﻿using Domain.VideoGame;
 using DomainKernel;
-using FeatureShared.Extensions;
 using Infrastructure.Database;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 
 namespace FeatureWithMediatR.Features.VideoGames;
 
@@ -59,21 +57,5 @@ public static class DeleteGame
 
             return Result.Success();
         }
-    }
-
-    /// <summary>
-    /// HTTPエンドポイント（ゲーム削除）
-    /// </summary>
-    /// <param name="sender">MediatR送信インターフェース</param>
-    /// <param name="id">削除対象のゲームID（ルートパラメータ）</param>
-    /// <param name="cancellationToken">キャンセルトークン</param>
-    /// <returns>HTTP 204 No Content または 404 Not Found</returns>
-    /// <remarks>
-    /// RESTful設計に従い、削除成功時はボディなしの204を返却。
-    /// </remarks>
-    public static async Task<IResult> Endpoint(ISender sender, int id, CancellationToken cancellationToken)
-    {
-        var result = await sender.Send(new DeleteGameCommand(id), cancellationToken);
-        return result.ToNoContent();
     }
 }

@@ -14,7 +14,7 @@ namespace FeatureWithoutMediatR.Feature.VideoGames.CreateGame;
 /// MediatR経由で処理されるアプリケーション内部のメッセージ。
 /// ValidationBehaviorにより自動的にValidatorが適用される。
 /// </remarks>
-internal sealed record CreateGameCommand(
+public sealed record CreateGameCommand(
     string Title,
     string Genre,
     int ReleaseYear) : ICommand<CreateGameResponse>

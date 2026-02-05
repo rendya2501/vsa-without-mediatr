@@ -1,10 +1,8 @@
 ﻿using Domain.VideoGame;
 using DomainKernel;
-using FeatureShared.Extensions;
 using FluentValidation;
 using Infrastructure.Database;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 
 namespace FeatureWithMediatR.Features.VideoGames;
 
@@ -33,21 +31,6 @@ namespace FeatureWithMediatR.Features.VideoGames;
 /// </remarks>
 public static class UpdateGame
 {
-    /// <summary>
-    /// ゲーム更新リクエスト（外部APIインターフェース）
-    /// </summary>
-    /// <param name="Title">新しいゲームタイトル（最大100文字）</param>
-    /// <param name="Genre">新しいゲームジャンル（最大50文字）</param>
-    /// <param name="ReleaseYear">新しいリリース年（1950年以降）</param>
-    /// <remarks>
-    /// Idはルートパラメータから取得するため、ボディには含めない。
-    /// CreateGameRequestと構造を合わせることで、API仕様の一貫性を保つ。
-    /// </remarks>
-    public record UpdateGameRequest(
-        string Title,
-        string Genre,
-        int ReleaseYear = VideoGameValidationRules.ReleaseYear.DefaultValue);
-
     /// <summary>
     /// ゲーム更新コマンド（内部処理用）
     /// </summary>
@@ -143,30 +126,5 @@ public static class UpdateGame
 
             return Result.Success(result);
         }
-    }
-
-    /// <summary>
-    /// HTTPエンドポイント（ゲーム更新）
-    /// </summary>
-    /// <param name="sender">MediatR送信インターフェース</param>
-    /// <param name="id">更新対象のゲームID（ルートパラメータ）</param>
-    /// <param name="request">更新内容（HTTPリクエストボディ）</param>
-    /// <param name="cancellationToken">キャンセルトークン</param>
-    /// <returns>HTTP 200 OK + 更新後情報 または 404 Not Found</returns>
-    /// <remarks>
-    /// PUT /api/games/{id} の形式で呼び出される。
-    /// ルートパラメータとボディを結合してCommandを生成。
-    /// </remarks>
-    public static async Task<IResult> Endpoint(
-        ISender sender, 
-        int id, 
-        UpdateGameRequest request, 
-        CancellationToken cancellationToken)
-    {
-        var command = new UpdateGameCommand(id, request.Title, request.Genre, request.ReleaseYear);
-
-        var result = await sender.Send(command, cancellationToken);
-
-        return result.ToOk();
     }
 }

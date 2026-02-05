@@ -2,13 +2,9 @@
 using Domain.VideoGame;
 using FeatureShared.Extensions;
 using FeatureShared.Messaging;
-using FeatureWithoutMediatR.Constants;
-using FeatureWithoutMediatR.Extension;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
+using FeatureWithoutMediatR.Feature.VideoGames.CreateGame;
 
-namespace FeatureWithoutMediatR.Feature.VideoGames.CreateGame;
+namespace Web.Api.Endpoints.WithoutMediatR.VideoGames;
 
 public sealed class CreateGameEndpoint : ICarterModule
 {
@@ -35,8 +31,8 @@ public sealed class CreateGameEndpoint : ICarterModule
     {
         app.MapWithoutMediatRGamesApi()
             .MapPost("/", async (
-                CreateGameRequest request,
                 ICommandHandler<CreateGameCommand, CreateGameResponse> handler,
+                CreateGameRequest request,
                 CancellationToken cancellationToken) =>
             {
                 var command = new CreateGameCommand(

@@ -10,7 +10,7 @@
 /// <remarks>
 /// 更新後の完全な情報を返却することで、クライアント側での再取得を不要にする。
 /// </remarks>
-internal sealed record UpdateGameResponse(
+public sealed record UpdateGameResponse(
     int Id,
     string Title,
     string Genre,

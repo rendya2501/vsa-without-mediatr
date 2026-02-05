@@ -1,11 +1,8 @@
 ﻿using Domain.VideoGame;
 using DomainKernel;
-using FeatureShared.Extensions;
-using FeatureWithMediatR.Constans;
 using FluentValidation;
 using Infrastructure.Database;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 
 namespace FeatureWithMediatR.Features.VideoGames;
 
@@ -28,21 +25,6 @@ namespace FeatureWithMediatR.Features.VideoGames;
 /// </remarks>
 public static class CreateGame
 {
-    /// <summary>
-    /// ゲーム作成リクエスト（外部APIインターフェース）
-    /// </summary>
-    /// <param name="Title">ゲームタイトル（最大100文字）</param>
-    /// <param name="Genre">ゲームジャンル（最大50文字）</param>
-    /// <param name="ReleaseYear">リリース年（1950年以降）</param>
-    /// <remarks>
-    /// OpenAPI/Scalarでドキュメント化される公開API契約。
-    /// 内部のCommandとは意図的に分離し、API仕様の独立性を保つ。
-    /// </remarks>
-    public record CreateGameRequest(
-        string Title,
-        string Genre,
-        int ReleaseYear = VideoGameValidationRules.ReleaseYear.DefaultValue);
-
     /// <summary>
     /// ゲーム作成コマンド（内部処理用）
     /// </summary>
@@ -138,35 +120,5 @@ public static class CreateGame
 
             return Result.Success(response);
         }
-    }
-
-    /// <summary>
-    /// HTTPエンドポイント（ゲーム作成）
-    /// </summary>
-    /// <param name="sender">MediatR送信インターフェース</param>
-    /// <param name="request">HTTPリクエストボディ</param>
-    /// <param name="cancellationToken">キャンセルトークン</param>
-    /// <returns>HTTP 201 Created + Location ヘッダ</returns>
-    /// <remarks>
-    /// Minimal API/Carterから呼び出される薄いレイヤー。
-    /// HTTPの詳細を隠蔽し、CommandへのマッピングとMediatR呼び出しのみを担当。
-    /// </remarks>
-    public static async Task<IResult> Endpoint(
-        ISender sender,
-        CreateGameRequest request,
-        CancellationToken cancellationToken)
-    {
-        var command = new CreateGameCommand(
-            request.Title,
-            request.Genre,
-            request.ReleaseYear
-        );
-
-        var result = await sender.Send(command, cancellationToken);
-
-        // 201 Created + Location ヘッダ付きレスポンス
-        return result.ToCreatedAtRoute(
-            routeName: VideoGameRounteNames.GetById,
-            routeValuesSelector: response => new { id = response.Id });
     }
 }

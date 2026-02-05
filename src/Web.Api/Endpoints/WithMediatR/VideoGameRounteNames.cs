@@ -1,4 +1,4 @@
-﻿namespace FeatureWithMediatR.Constans;
+﻿namespace Web.Api.Endpoints.WithMediatR;
 
 /// <summary>
 /// VideoGames機能のすべての定数定義

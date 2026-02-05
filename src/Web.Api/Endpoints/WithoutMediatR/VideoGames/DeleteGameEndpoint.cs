@@ -1,13 +1,9 @@
 ﻿using Carter;
 using FeatureShared.Extensions;
 using FeatureShared.Messaging;
-using FeatureWithoutMediatR.Constants;
-using FeatureWithoutMediatR.Extension;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
+using FeatureWithoutMediatR.Feature.VideoGames.DeleteGame;
 
-namespace FeatureWithoutMediatR.Feature.VideoGames.DeleteGame;
+namespace Web.Api.Endpoints.WithoutMediatR.VideoGames;
 
 public sealed class DeleteGameEndpoint : ICarterModule
 {
@@ -15,8 +11,8 @@ public sealed class DeleteGameEndpoint : ICarterModule
     {
         app.MapWithoutMediatRGamesApi()
             .MapDelete("/{id:int}", async (
-                int id,
                 ICommandHandler<DeleteGameCommand> handler,
+                int id,
                 CancellationToken cancellationToken) =>
             {
                 var result = await handler.Handle(new DeleteGameCommand(id), cancellationToken);

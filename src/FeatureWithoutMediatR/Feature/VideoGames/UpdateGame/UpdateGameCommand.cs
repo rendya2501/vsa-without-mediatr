@@ -1,6 +1,5 @@
 ﻿using Domain.VideoGame;
 using FeatureShared.Messaging;
-using FeatureWithoutMediatR.Constants;
 using FluentValidation;
 
 namespace FeatureWithoutMediatR.Feature.VideoGames.UpdateGame;
@@ -16,7 +15,7 @@ namespace FeatureWithoutMediatR.Feature.VideoGames.UpdateGame;
 /// ルートパラメータとリクエストボディを結合したコマンド。
 /// ValidationBehaviorにより自動的にValidatorが適用される。
 /// </remarks>
-internal sealed record UpdateGameCommand(
+public sealed record UpdateGameCommand(
     int Id,
     string Title,
     string Genre,

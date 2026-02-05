@@ -10,4 +10,4 @@ namespace FeatureWithoutMediatR.Feature.VideoGames.GetAllGames;
 /// 将来的にフィルタリングやソート機能を追加する場合は、
 /// プロパティを追加して拡張可能。
 /// </remarks>
-internal sealed record GetAllGamesQuery : IQuery<IEnumerable<GetAllGamesResponse>>;
+public sealed record GetAllGamesQuery : IQuery<IEnumerable<GetAllGamesResponse>>;

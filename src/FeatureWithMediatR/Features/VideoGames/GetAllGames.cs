@@ -1,8 +1,6 @@
 ﻿using DomainKernel;
-using FeatureShared.Extensions;
 using Infrastructure.Database;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace FeatureWithMediatR.Features.VideoGames;
@@ -81,20 +79,5 @@ public static class GetAllGames
 
             return Result.Success(response);
         }
-    }
-
-    /// <summary>
-    /// HTTPエンドポイント（ゲーム一覧取得）
-    /// </summary>
-    /// <param name="sender">MediatR送信インターフェース</param>
-    /// <param name="cancellationToken">キャンセルトークン</param>
-    /// <returns>HTTP 200 OK + ゲーム一覧</returns>
-    /// <remarks>
-    /// クエリパラメータを受け取らないシンプルなGETエンドポイント。
-    /// </remarks>
-    public static async Task<IResult> Endpoint(ISender sender, CancellationToken cancellationToken)
-    {
-        var result = await sender.Send(new GetAllGamesQuery(), cancellationToken);
-        return result.ToOk();
     }
 }

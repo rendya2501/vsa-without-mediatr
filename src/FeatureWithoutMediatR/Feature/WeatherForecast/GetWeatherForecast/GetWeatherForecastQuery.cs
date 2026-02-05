@@ -6,4 +6,4 @@ namespace FeatureWithoutMediatR.Feature.WeatherForecast.GetWeatherForecast;
 /// 天気予報取得クエリ
 /// </summary>
 /// <remarks>
-internal sealed record WeatherForecastQuery : IQuery<IEnumerable<WeatherForecastResponse>>;
+public sealed record WeatherForecastQuery : IQuery<IEnumerable<WeatherForecastResponse>>;

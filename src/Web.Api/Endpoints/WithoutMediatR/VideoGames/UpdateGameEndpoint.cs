@@ -2,13 +2,9 @@
 using Domain.VideoGame;
 using FeatureShared.Extensions;
 using FeatureShared.Messaging;
-using FeatureWithoutMediatR.Constants;
-using FeatureWithoutMediatR.Extension;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
+using FeatureWithoutMediatR.Feature.VideoGames.UpdateGame;
 
-namespace FeatureWithoutMediatR.Feature.VideoGames.UpdateGame;
+namespace Web.Api.Endpoints.WithoutMediatR.VideoGames;
 
 public sealed class UpdateGameEndpoint : ICarterModule
 {
@@ -31,9 +27,9 @@ public sealed class UpdateGameEndpoint : ICarterModule
     {
         app.MapWithoutMediatRGamesApi()
             .MapPut("/{id:int}", async (
+                ICommandHandler<UpdateGameCommand, UpdateGameResponse> handler,
                 int id,
                 UpdateGameRequest request,
-                ICommandHandler<UpdateGameCommand, UpdateGameResponse> handler,
                 CancellationToken cancellationToken) =>
             {
                 var command = new UpdateGameCommand(id, request.Title, request.Genre, request.ReleaseYear);

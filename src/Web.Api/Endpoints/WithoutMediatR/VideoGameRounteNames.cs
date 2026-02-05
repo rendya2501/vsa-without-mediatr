@@ -1,4 +1,4 @@
-﻿namespace FeatureWithoutMediatR.Constants;
+﻿namespace Web.Api.Endpoints.WithoutMediatR;
 
 /// <summary>
 /// ルート名定数

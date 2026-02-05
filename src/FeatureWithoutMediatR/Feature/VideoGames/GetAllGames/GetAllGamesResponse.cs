@@ -11,7 +11,7 @@
 /// 一覧表示に必要な最小限のフィールドのみを含む。
 /// 詳細情報が必要な場合はGetByIdを使用。
 /// </remarks>
-internal sealed record GetAllGamesResponse(
+public sealed record GetAllGamesResponse(
     int Id,
     string Title,
     string Genre,

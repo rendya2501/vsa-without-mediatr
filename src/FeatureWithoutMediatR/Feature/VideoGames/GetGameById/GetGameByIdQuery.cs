@@ -9,4 +9,4 @@ namespace FeatureWithoutMediatR.Feature.VideoGames.GetGameById;
 /// <remarks>
 /// 戻り値がnullableであり、データ不在時はnullを返す設計。
 /// </remarks>
-internal sealed record GetGameByIdQuery(int Id) : IQuery<GetGameByIdResponse>;
+public sealed record GetGameByIdQuery(int Id) : IQuery<GetGameByIdResponse>;

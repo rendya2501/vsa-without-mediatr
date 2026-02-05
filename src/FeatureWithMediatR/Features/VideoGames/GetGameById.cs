@@ -1,9 +1,7 @@
 ﻿using Domain.VideoGame;
 using DomainKernel;
-using FeatureShared.Extensions;
 using Infrastructure.Database;
 using MediatR;
-using Microsoft.AspNetCore.Http;
 
 namespace FeatureWithMediatR.Features.VideoGames;
 
@@ -86,21 +84,5 @@ public static class GetGameById
 
             return Result.Success(response);
         }
-    }
-
-    /// <summary>
-    /// HTTPエンドポイント（ゲーム詳細取得）
-    /// </summary>
-    /// <param name="sender">MediatR送信インターフェース</param>
-    /// <param name="id">取得対象のゲームID（ルートパラメータ）</param>
-    /// <param name="cancellationToken">キャンセルトークン</param>
-    /// <returns>HTTP 200 OK + 詳細情報 または 404 Not Found</returns>
-    /// <remarks>
-    /// RESTful設計に従い、リソースの存在有無をHTTPステータスで表現。
-    /// </remarks>
-    public static async Task<IResult> Endpoint(ISender sender, int id, CancellationToken cancellationToken)
-    {
-        var result = await sender.Send(new GetGameByIdQuery(id), cancellationToken);
-        return result.ToOk();
     }
 }
