@@ -3,8 +3,17 @@ using Microsoft.AspNetCore.Http;
 
 namespace FeatureShared.Infrastructure;
 
+/// <summary>
+/// Result を RFC 7807 準拠の ProblemDetails に変換するヘルパークラス
+/// </summary>
 public static class CustomResults
 {
+    /// <summary>
+    /// Result の失敗情報を ProblemDetails 形式の HTTP レスポンスに変換
+    /// </summary>
+    /// <param name="result">失敗した Result オブジェクト</param>
+    /// <returns>ProblemDetails を含む IResult</returns>
+    /// <exception cref="InvalidOperationException">成功した Result が渡された場合</exception>
     public static IResult Problem(Result result)
     {
         if (result.IsSuccess)
@@ -19,6 +28,7 @@ public static class CustomResults
             statusCode: GetStatusCode(result.Error.Type),
             extensions: GetErrors(result));
 
+        // エラータイプに応じたタイトルを取得
         static string GetTitle(Error error) =>
             error.Type switch
             {
@@ -29,6 +39,7 @@ public static class CustomResults
                 _ => "Server failure"
             };
 
+        // エラータイプに応じた詳細説明を取得
         static string GetDetail(Error error) =>
             error.Type switch
             {
@@ -39,6 +50,7 @@ public static class CustomResults
                 _ => "An unexpected error occurred"
             };
 
+        // エラータイプに応じた RFC 7807 の type URI を取得
         static string GetType(ErrorType errorType) =>
             errorType switch
             {
@@ -49,6 +61,7 @@ public static class CustomResults
                 _ => "https://tools.ietf.org/html/rfc7231#section-6.6.1"
             };
 
+        // エラータイプに応じた HTTP ステータスコードを取得
         static int GetStatusCode(ErrorType errorType) =>
             errorType switch
             {
@@ -58,6 +71,7 @@ public static class CustomResults
                 _ => StatusCodes.Status500InternalServerError
             };
 
+        // ValidationError の場合、個別エラーを extensions に追加
         static Dictionary<string, object?>? GetErrors(Result result)
         {
             if (result.Error is not ValidationError validationError)
