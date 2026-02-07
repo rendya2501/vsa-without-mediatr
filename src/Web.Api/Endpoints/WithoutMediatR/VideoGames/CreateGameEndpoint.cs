@@ -1,5 +1,4 @@
 ﻿using Carter;
-using Web.Api.Endpoints;
 using Domain.VideoGame;
 using FeatureShared.Extensions;
 using FeatureShared.Messaging;

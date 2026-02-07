@@ -1,5 +1,4 @@
 ﻿using Carter;
-using Web.Api.Endpoints;
 using FeatureShared.Extensions;
 using FeatureShared.Messaging;
 using FeatureWithoutMediatR.Feature.VideoGames.GetGameById;
