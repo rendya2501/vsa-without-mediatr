@@ -27,8 +27,7 @@ internal sealed class UpdateGameHandler(VideoGameDbContext dbContext)
 
         if (videoGame is null)
         {
-            // return Result.Failure(VideoGameErrors.NotFound(command.Id));
-            return VideoGameErrors.NotFound(command.Id);
+            return Result.Failure<UpdateGameResponse>(VideoGameErrors.NotFound(command.Id));
         }
 
         videoGame.Title = command.Title;

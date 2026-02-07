@@ -70,25 +70,26 @@ public class Result
 /// <summary>
 /// 値を返す操作の結果
 /// </summary>
-/// <typeparam name="T">成功時に返す値の型</typeparam>
-public class Result<T>(T? value, bool isSuccess, Error? error) : Result(isSuccess, error)
+/// <typeparam name="TValue">成功時に返す値の型</typeparam>
+public class Result<TValue>(TValue? value, bool isSuccess, Error? error) : Result(isSuccess, error)
 {
     /// <summary>
     /// 成功時の値を取得
     /// </summary>
     /// <exception cref="InvalidOperationException">失敗結果で値にアクセスした場合</exception>
     [NotNull]
-    public T Value => IsSuccess
+    public TValue Value => IsSuccess
         ? value!
         : throw new InvalidOperationException("Cannot access value of a failure result");
 
     /// <summary>
     /// エラーからの暗黙的変換
     /// </summary>
-    public static implicit operator Result<T>(Error error) => Failure<T>(error);
+    public static implicit operator Result<TValue>(Error error) => Failure<TValue>(error);
 
     /// <summary>
     /// 値からの暗黙的変換
     /// </summary>
-    public static implicit operator Result<T>(T value) => Success(value);
+    // public static implicit operator Result<TValue>(TValue value) =>
+    //    value is not null ? Success(value) : Failure<TValue>(Error.NullValue);
 }

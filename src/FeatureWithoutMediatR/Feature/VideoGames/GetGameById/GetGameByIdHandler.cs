@@ -28,8 +28,7 @@ internal sealed class GetGameByIdHandler(VideoGameDbContext dbContext)
 
         if (videoGame is null)
         {
-            // return Result.Failure(VideoGameErrors.NotFound(query.Id));
-            return VideoGameErrors.NotFound(query.Id);
+            return Result.Failure<GetGameByIdResponse>(VideoGameErrors.NotFound(query.Id));
         }
 
         var resposne = new GetGameByIdResponse(
