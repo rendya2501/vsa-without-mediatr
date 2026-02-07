@@ -50,14 +50,12 @@ public static class ResultHttpExtensions
     /// <param name="onSuccess">成功時の処理</param>
     /// <returns>IResult オブジェクト</returns>
     /// <remarks>
-    /// <para>
-    /// <strong>202 Accepted 例</strong><br/>
+    /// <para><strong>202 Accepted 例</strong></para>
     /// <code>
-    /// public static async Task<IResult> Endpoint(...)
+    /// public static async Task&lt;IResult&gt; Endpoint(...)
     ///     => (await sender.Send(new StartJobCommand(id), ct))
     ///         .ToResult(job => Results.Accepted($"/api/jobs/{job.Id}", job));
     /// </code>
-    /// </para>
     /// </remarks>
     public static IResult ToResult<T>(
         this Result<T> result,
@@ -71,22 +69,20 @@ public static class ResultHttpExtensions
     /// <param name="onSuccess"></param>
     /// <returns></returns>
     /// <remarks>
-    /// <para>
-    /// <strong>複雑なロジック 例</strong><br/>
+    /// <para><strong>複雑なロジック 例</strong></para>
     /// <code>
-    /// public static async Task<IResult> Endpoint(ISender sender, int id, CancellationToken ct)
+    /// public static async Task&lt;IResult&gt; Endpoint(ISender sender, int id, CancellationToken ct)
     ///     => (await sender.Send(new SomeCommand(id), ct))
     ///         .ToResult(value =>
     ///         {
     ///             // 複雑なロジック
-    ///             var headers = new Dictionary<string, string>
+    ///             var headers = new Dictionary&lt;string, string&gt;
     ///             {
     ///                 ["X-Custom-Header"] = value.SomeProperty
     ///             };
     ///             return Results.Ok(value);
     ///         });
     /// </code>
-    /// </para>
     /// </remarks>
     public static IResult ToResult(
         this Result result,
