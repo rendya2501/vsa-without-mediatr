@@ -2,7 +2,7 @@
 
 namespace Infrastructure.Database.Seeding;
 
-public sealed class VideoGameDbSeeder(VideoGameDbContext dbContext) : IDbSeeder
+public sealed class ApplicationDbSeeder(ApplicationDbContext dbContext) : IDbSeeder
 {
     public async Task SeedAsync(CancellationToken cancellationToken = default)
     {
