@@ -7,34 +7,34 @@ using System.Diagnostics;
 namespace FeatureWithMediatR.Behaivors;
 
 /// <summary>
-/// MediatR の Pipeline Behavior（Serilogロギング処理）
+/// ロギングビヘイビアー
 /// </summary>
 /// <typeparam name="TRequest">MediatR の Request 型</typeparam>
 /// <typeparam name="TResponse">MediatR の Response 型</typeparam>
 /// <remarks>
 /// <para>
-/// すべての Request/Response を自動的にログに記録する横断的関心事。
-/// ValidationBehavior と同様に、Handler の前後で実行される。
+/// MediatR の Pipeline Behavior として、すべての Request/Response を自動的にログに記録します。
+/// ValidationBehavior と同様に、Handler の前後で実行されます。
 /// </para>
 /// <para>
-/// <strong>処理フロー:</strong><br/>
-/// 1. リクエスト開始時刻とGUIDを記録<br/>
-/// 2. リクエスト内容を構造化ログとして記録<br/>
-/// 3. 次の処理（Validation → Handler）を実行<br/>
-/// 4. レスポンス内容と実行時間を記録<br/>
-/// 5. エラー発生時は例外情報を記録
+/// <strong>構造化ログ（Serilog）:</strong><br/>
+/// {@Object} 構文により、オブジェクトが構造化されたプロパティとして記録されます。
+/// これにより、Seq、Elasticsearch、Splunk などのログ分析ツールで効率的に検索できます。
 /// </para>
 /// <para>
-/// <strong>Serilogの構造化ログ:</strong><br/>
-/// {@Request} のように @ を使用することで、
-/// オブジェクトが構造化されたプロパティとしてログに記録される。
-/// これにより、Seq、Elasticsearch、Splunk などで検索可能になる。
+/// <strong>セキュリティ:</strong><br/>
+/// Password、Secret、Token を含むプロパティは自動的にマスクされます。
 /// </para>
 /// <para>
-/// <strong>ログ出力例:</strong><br/>
+/// <strong>分散トレーシング:</strong><br/>
+/// リクエストごとに一意のGUIDを生成し、分散環境でのログ追跡を可能にします。
+/// </para>
+/// <para>
+/// <strong>ログ出力例:</strong>
 /// <code>
-/// [14:23:45 INF] Handling CreateGameCommand [a3f2b1c8] {@Request}
-/// [14:23:45 INF] Handled CreateGameCommand [a3f2b1c8] in 45ms {@Response}
+/// [14:23:45 INF] Request started: CreateGameCommand [a3f2b1c8] {...}
+/// [14:23:45 INF] Request completed: CreateGameCommand [a3f2b1c8] in 45ms {...}
+/// [14:23:46 ERR] Request failed: UpdateGameCommand [b4e3c2d9] in 120ms {...}
 /// </code>
 /// </para>
 /// </remarks>
@@ -47,79 +47,55 @@ public class LoggingBehavior<TRequest, TResponse>(
     /// <summary>
     /// MediatR パイプラインでの処理実行
     /// </summary>
-    /// <param name="request">実際に送信された Command / Query</param>
-    /// <param name="next">次の処理（次の Behavior or 最終的な Handler）</param>
+    /// <param name="request">実際に送信された Command または Query</param>
+    /// <param name="next">次の処理（ValidationBehavior → Handler）</param>
     /// <param name="cancellationToken">キャンセルトークン</param>
     /// <returns>Handler からの Response</returns>
-    /// <remarks>
-    /// <para>
-    /// リクエスト単位でGUIDを生成することで、
-    /// 分散ログ環境でも同一リクエストのログを追跡可能にする。
-    /// </para>
-    /// <para>
-    /// Serilogの構造化ログを活用し、{@Request} / {@Response} として
-    /// オブジェクト全体を記録することで、Seq等での高度な検索を実現。
-    /// </para>
-    /// </remarks>
     public async Task<TResponse> Handle(
         TRequest request,
         RequestHandlerDelegate<TResponse> next,
         CancellationToken cancellationToken)
     {
-        // リクエスト名
-        var requestName = typeof(TRequest).Name;
-        // 短縮GUID (8文字)                                                          
-        var requestGuid = Guid.NewGuid().ToString("N")[..8];
-        // 機密情報をマスク
+        var requestName = typeof(TRequest).Name;                                                           
+        var requestGuid = Guid.NewGuid().ToString("N")[..8];  // 短縮GUID (8文字)
         var sanitizedRequest = SanitizeRequest(request);
-        // 処理時間を計測
         var stopwatch = Stopwatch.StartNew();
 
-        // リクエスト開始ログ
-        // {@Request} で構造化ログとして記録(Serilogの機能)
-        if (logger.IsEnabled(LogLevel.Information))
-        {
-            logger.LogInformation(
-                "Handling {RequestName} [{RequestGuid}] {@Request}",
-                requestName,
-                requestGuid,
-                sanitizedRequest);
-        }
+        logger.LogInformation(
+            "Request started: {RequestName} [{RequestGuid}] {@Request}",
+            requestName,
+            requestGuid,
+            sanitizedRequest);
 
         TResponse response;
 
         try
         {
-            // 次の処理を実行（ValidationBehavior → Handler）
+            // 次の処理を実行
             response = await next(cancellationToken);
-
             stopwatch.Stop();
-
 
             if (response.IsSuccess)
             {
-                if (logger.IsEnabled(LogLevel.Information))
-                    logger.LogInformation("Completed command {Command}", requestName);
+                logger.LogInformation(
+                    "Request completed: {RequestName} [{RequestGuid}] in {ElapsedMilliseconds}ms {@Response}",
+                    requestName,
+                    requestGuid,
+                    stopwatch.ElapsedMilliseconds,
+                    response);
             }
             else
             {
                 using (LogContext.PushProperty("Error", response.Error, true))
                 {
-                    logger.LogError("Completed command {Command} with error", requestName);
+                    logger.LogError(
+                        "Request error: {RequestName} [{RequestGuid}] in {ElapsedMilliseconds}ms {@Response}",
+                        requestName,
+                        requestGuid,
+                        stopwatch.ElapsedMilliseconds,
+                        response);
                 }
             }
-
-            //// リクエスト成功ログ
-            //// {@Response} で構造化ログとして記録
-            //if (logger.IsEnabled(LogLevel.Information))
-            //{
-            //    logger.LogInformation(
-            //        "Handled {RequestName} [{RequestGuid}] in {ElapsedMilliseconds}ms {@Response}",
-            //        requestName,
-            //        requestGuid,
-            //        stopwatch.ElapsedMilliseconds,
-            //        response);
-            //}
         }
         catch (Exception ex)
         {
@@ -129,7 +105,7 @@ public class LoggingBehavior<TRequest, TResponse>(
             // Serilogは例外オブジェクトを自動的に構造化して記録
             logger.LogError(
                 ex,
-                "Error handling {RequestName} [{RequestGuid}] after {ElapsedMilliseconds}ms",
+                "Request error: {RequestName} [{RequestGuid}] after {ElapsedMilliseconds}ms",
                 requestName,
                 requestGuid,
                 stopwatch.ElapsedMilliseconds);
@@ -142,13 +118,15 @@ public class LoggingBehavior<TRequest, TResponse>(
     }
 
     /// <summary>
-    /// リクエスト内容をマスク
+    /// 機密情報を含むプロパティをマスク
     /// </summary>
-    /// <param name="request">リクエスト</param>
-    /// <returns>マスクされたリクエスト内容</returns>
+    /// <param name="request">リクエストオブジェクト</param>
+    /// <returns>マスク処理されたプロパティのディクショナリ</returns>
+    /// <remarks>
+    /// Password、Secret、Token を名前に含むプロパティは "***REDACTED***" に置き換えられます。
+    /// </remarks>
     private static Dictionary<string, object?> SanitizeRequest(TRequest request)
     {
-        // プロパティ名に "Password", "Secret", "Token" が含まれる場合はマスク
         var properties = typeof(TRequest).GetProperties()
             .Select(p => new
             {
