@@ -5,15 +5,16 @@
     <Platform Name="x86" />
   </Configurations>
   <Folder Name="/Solituon Items/">
+    <File Path=".editorconfig" />
     <File Path="README.md" />
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/Domain/Domain.csproj" />
     <Project Path="src/DomainKernel/DomainKernel.csproj" />
+    <Project Path="src/FeatureShared/FeatureShared.csproj" />
     <Project Path="src/FeatureWithMediatR/FeatureWithMediatR.csproj" />
     <Project Path="src/FeatureWithoutMediatR/FeatureWithoutMediatR.csproj" />
     <Project Path="src/Infrastructure/Infrastructure.csproj" />
-    <Project Path="src/FeatureShared/FeatureShared.csproj" />
     <Project Path="src/Web.Api/Web.Api.csproj" />
   </Folder>
   <Folder Name="/tests/">
