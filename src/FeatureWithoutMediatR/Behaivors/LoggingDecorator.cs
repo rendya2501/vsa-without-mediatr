@@ -10,19 +10,42 @@ namespace FeatureWithoutMediatR.Behaivors;
 /// </summary>
 /// <remarks>
 /// <para>
-/// すべてのコマンドとクエリをロギングする。
+/// Decorator パターンを使用して、すべての Command/Query Handler にロギング機能を追加します。
+/// MediatR を使用しない軽量なアーキテクチャ向けの実装です。
+/// </para>
+/// <para>
+/// <strong>設計の特徴:</strong><br/>
+/// - MediatR の Pipeline Behavior と同等の機能を Decorator で実現<br/>
+/// - 各 Handler 型（Command with Response / Command without Response / Query）ごとに専用クラスを提供<br/>
+/// - DI コンテナで自動的に Handler をラップして登録
+/// </para>
+/// <para>
+/// <strong>構造化ログ（Serilog）:</strong><br/>
+/// LogContext.PushProperty でエラー情報を構造化してログに記録します。
+/// これにより、ログ分析ツール（Seq、Elasticsearch等）で効率的に検索できます。
+/// </para>
+/// <para>
+/// <strong>ログ出力例:</strong>
+/// <code>
+/// [14:23:45 INF] Command started: CreateGameCommand
+/// [14:23:45 INF] Command completed: CreateGameCommand
+/// [14:23:46 ERR] Command failed: UpdateGameCommand
+/// </code>
 /// </para>
 /// </remarks>
 internal static class LoggingDecorator
 {
     /// <summary>
-    /// レスポンスありコマンドハンドラー
+    /// レスポンスありコマンドハンドラー用ロギングデコレーター
     /// </summary>
-    /// <typeparam name="TCommand">コマンド</typeparam>
-    /// <typeparam name="TResponse">レスポンス</typeparam>
-    /// <param name="innerHandler">内部ハンドラー</param>
+    /// <typeparam name="TCommand">コマンド型（ICommand&lt;TResponse&gt; を実装）</typeparam>
+    /// <typeparam name="TResponse">レスポンス型</typeparam>
+    /// <param name="innerHandler">デコレート対象の実際のハンドラー</param>
     /// <param name="logger">ロガー</param>
-    /// <returns>レスポンス</returns>
+    /// <remarks>
+    /// Result&lt;TResponse&gt; を返す Command 専用のデコレーターです。
+    /// 成功/失敗に応じて適切なログレベルで記録します。
+    /// </remarks>
     internal sealed class CommandHandler<TCommand, TResponse>(
         ICommandHandler<TCommand, TResponse> innerHandler,
         ILogger<CommandHandler<TCommand, TResponse>> logger)
@@ -33,19 +56,19 @@ internal static class LoggingDecorator
         {
             string commandName = typeof(TCommand).Name;
 
-            logger.LogInformation("Processing command {Command}", commandName);
+            logger.LogInformation("Command started: {CommandName}", commandName);
 
             Result<TResponse> result = await innerHandler.Handle(command, cancellationToken);
 
             if (result.IsSuccess)
             {
-                logger.LogInformation("Completed command {Command}", commandName);
+                logger.LogInformation("Command completed: {CommandName}", commandName);
             }
             else
             {
                 using (LogContext.PushProperty("Error", result.Error, true))
                 {
-                    logger.LogError("Completed command {Command} with error", commandName);
+                    logger.LogError("Command failed: {CommandName}", commandName);
                 }
             }
 
@@ -54,12 +77,15 @@ internal static class LoggingDecorator
     }
 
     /// <summary>
-    /// レスポンスなしコマンドハンドラー
+    /// レスポンスなしコマンドハンドラー用ロギングデコレーター
     /// </summary>
-    /// <typeparam name="TCommand">コマンド</typeparam>
-    /// <param name="innerHandler">内部ハンドラー</param>
+    /// <typeparam name="TCommand">コマンド型（ICommand を実装）</typeparam>
+    /// <param name="innerHandler">デコレート対象の実際のハンドラー</param>
     /// <param name="logger">ロガー</param>
-    /// <returns>レスポンス</returns>
+    /// <remarks>
+    /// Result（レスポンスなし）を返す Command 専用のデコレーターです。
+    /// 副作用のみを実行する Command（削除、更新等）で使用されます。
+    /// </remarks>
     internal sealed class CommandBaseHandler<TCommand>(
         ICommandHandler<TCommand> innerHandler,
         ILogger<CommandBaseHandler<TCommand>> logger)
@@ -70,19 +96,19 @@ internal static class LoggingDecorator
         {
             string commandName = typeof(TCommand).Name;
 
-            logger.LogInformation("Processing command {Command}", commandName);
+            logger.LogInformation("Command started: {CommandName}", commandName);
 
             Result result = await innerHandler.Handle(command, cancellationToken);
 
             if (result.IsSuccess)
             {
-                logger.LogInformation("Completed command {Command}", commandName);
+                logger.LogInformation("Command completed: {CommandName}", commandName);
             }
             else
             {
                 using (LogContext.PushProperty("Error", result.Error, true))
                 {
-                    logger.LogError("Completed command {Command} with error", commandName);
+                    logger.LogError("Command failed: {CommandName}", commandName);
                 }
             }
 
@@ -91,13 +117,16 @@ internal static class LoggingDecorator
     }
 
     /// <summary>
-    /// クエリハンドラー
+    /// クエリハンドラー用ロギングデコレーター
     /// </summary>
-    /// <typeparam name="TQuery">クエリ</typeparam>
-    /// <typeparam name="TResponse">レスポンス</param>
-    /// <param name="innerHandler">内部ハンドラー</param>
+    /// <typeparam name="TQuery">クエリ型（IQuery&lt;TResponse&gt; を実装）</typeparam>
+    /// <typeparam name="TResponse">レスポンス型</typeparam>
+    /// <param name="innerHandler">デコレート対象の実際のハンドラー</param>
     /// <param name="logger">ロガー</param>
-    /// <returns>レスポンス</returns>
+    /// <remarks>
+    /// Result&lt;TResponse&gt; を返す Query 専用のデコレーターです。
+    /// Command と異なり、データの読み取りのみを行います（副作用なし）。
+    /// </remarks>
     internal sealed class QueryHandler<TQuery, TResponse>(
         IQueryHandler<TQuery, TResponse> innerHandler,
         ILogger<QueryHandler<TQuery, TResponse>> logger)
@@ -106,21 +135,21 @@ internal static class LoggingDecorator
     {
         public async Task<Result<TResponse>> Handle(TQuery query, CancellationToken cancellationToken = default)
         {
-            string requestName = typeof(TQuery).Name;
+            string queryName = typeof(TQuery).Name;
 
-            logger.LogInformation("Processing request {RequestName}", requestName);
+            logger.LogInformation("Query started: {QueryName}", queryName);
 
             Result<TResponse> result = await innerHandler.Handle(query, cancellationToken);
 
             if (result.IsSuccess)
             {
-                logger.LogInformation("Completed request {RequestName}", requestName);
+                logger.LogInformation("Query completed: {QueryName}", queryName);
             }
             else
             {
                 using (LogContext.PushProperty("Error", result.Error, true))
                 {
-                    logger.LogError("Processing request {RequestName} with error", requestName);
+                    logger.LogError("Query failed: {QueryName}", queryName);
                 }
             }
 
