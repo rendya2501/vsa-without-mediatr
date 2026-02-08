@@ -15,8 +15,8 @@ public static class ResultHttpExtensions
     /// <typeparam name="T"></typeparam>
     /// <param name="result"></param>
     /// <returns></returns>
-    public static IResult ToOk<T>(this Result<T> result)
-        => result.Match(Results.Ok, CustomResults.Problem);
+    public static IResult ToOk<T>(this Result<T> result) =>
+        result.Match(Results.Ok, CustomResults.Problem);
 
     /// <summary>
     /// 201 Created At Route
@@ -29,18 +29,18 @@ public static class ResultHttpExtensions
     public static IResult ToCreatedAtRoute<T>(
         this Result<T> result,
         string routeName,
-        Func<T, object> routeValuesSelector)
-        => result.Match(
-            value => Results.CreatedAtRoute(routeName, routeValuesSelector(value), value),
-            CustomResults.Problem);
+        Func<T, object> routeValuesSelector) =>
+            result.Match(
+                value => Results.CreatedAtRoute(routeName, routeValuesSelector(value), value),
+                CustomResults.Problem);
 
     /// <summary>
     /// 205 No Content
     /// </summary>
     /// <param name="result"></param>
     /// <returns></returns>
-    public static IResult ToNoContent(this Result result)
-        => result.Match(Results.NoContent, CustomResults.Problem);
+    public static IResult ToNoContent(this Result result) =>
+        result.Match(Results.NoContent, CustomResults.Problem);
 
     /// <summary>
     /// カスタムレスポンス
@@ -57,10 +57,8 @@ public static class ResultHttpExtensions
     ///         .ToResult(job => Results.Accepted($"/api/jobs/{job.Id}", job));
     /// </code>
     /// </remarks>
-    public static IResult ToResult<T>(
-        this Result<T> result,
-        Func<T, IResult> onSuccess)
-            => result.Match(onSuccess, CustomResults.Problem);
+    public static IResult ToResult<T>(this Result<T> result, Func<T, IResult> onSuccess) =>
+        result.Match(onSuccess, CustomResults.Problem);
 
     /// <summary>
     /// カスタムレスポンス
@@ -84,8 +82,6 @@ public static class ResultHttpExtensions
     ///         });
     /// </code>
     /// </remarks>
-    public static IResult ToResult(
-        this Result result,
-        Func<IResult> onSuccess)
-            => result.Match(onSuccess, CustomResults.Problem);
+    public static IResult ToResult(this Result result, Func<IResult> onSuccess) =>
+        result.Match(onSuccess, CustomResults.Problem);
 }
