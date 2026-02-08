@@ -104,21 +104,17 @@ internal static class LoggingDecorator
             : IQueryHandler<TQuery, TResponse>
             where TQuery : IQuery<TResponse>
     {
-        private readonly bool logInfoFlag = logger.IsEnabled(LogLevel.Information);
-
         public async Task<Result<TResponse>> Handle(TQuery query, CancellationToken cancellationToken = default)
         {
             string requestName = typeof(TQuery).Name;
 
-            if (logInfoFlag)
-                logger.LogInformation("Processing request {RequestName}", requestName);
+            logger.LogInformation("Processing request {RequestName}", requestName);
 
             Result<TResponse> result = await innerHandler.Handle(query, cancellationToken);
 
             if (result.IsSuccess)
             {
-                if (logger.IsEnabled(LogLevel.Information))
-                    logger.LogInformation("Completed request {RequestName}", requestName);
+                logger.LogInformation("Completed request {RequestName}", requestName);
             }
             else
             {
