@@ -8,7 +8,7 @@ namespace FeatureWithoutMediatR.Feature.VideoGames.UpdateGame;
 /// <summary>
 /// コマンドハンドラ（更新処理実行）
 /// </summary>
-internal sealed class UpdateGameHandler(VideoGameDbContext dbContext)
+internal sealed class UpdateGameHandler(ApplicationDbContext dbContext)
     : ICommandHandler<UpdateGameCommand, UpdateGameResponse>
 {
     /// <summary>

@@ -94,7 +94,7 @@ public static class UpdateGame
     /// <summary>
     /// コマンドハンドラ（更新処理実行）
     /// </summary>
-    public class Handler(VideoGameDbContext dbContext)
+    public class Handler(ApplicationDbContext dbContext)
         : IRequestHandler<UpdateGameCommand, Result<UpdateGameResponse>>
     {
         /// <summary>

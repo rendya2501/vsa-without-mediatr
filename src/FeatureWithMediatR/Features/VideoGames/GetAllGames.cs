@@ -57,7 +57,7 @@ public static class GetAllGames
     /// <summary>
     /// クエリハンドラ（一覧取得処理実行）
     /// </summary>
-    public class Handler(VideoGameDbContext dbContext)
+    public class Handler(ApplicationDbContext dbContext)
         : IRequestHandler<GetAllGamesQuery, Result<IEnumerable<GetAllGamesResponse>>>
     {
         /// <summary>

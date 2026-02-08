@@ -8,7 +8,7 @@ namespace FeatureWithoutMediatR.Feature.VideoGames.DeleteGame;
 /// <summary>
 /// コマンドハンドラ（削除処理実行）
 /// </summary>
-internal sealed class DeleteGameHandler(VideoGameDbContext dbContext)
+internal sealed class DeleteGameHandler(ApplicationDbContext dbContext)
     : ICommandHandler<DeleteGameCommand>
 {
     /// <summary>

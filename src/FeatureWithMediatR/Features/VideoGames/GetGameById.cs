@@ -53,7 +53,7 @@ public static class GetGameById
     /// <summary>
     /// クエリハンドラ（詳細取得処理実行）
     /// </summary>
-    public class Handler(VideoGameDbContext dbContext)
+    public class Handler(ApplicationDbContext dbContext)
         : IRequestHandler<GetGameByIdQuery, Result<GetGameByIdResponse>>
     {
         /// <summary>

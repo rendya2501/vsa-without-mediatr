@@ -35,7 +35,7 @@ public static class DeleteGame
     /// <summary>
     /// コマンドハンドラ（削除処理実行）
     /// </summary>
-    public class Handler(VideoGameDbContext dbContext) : IRequestHandler<DeleteGameCommand, Result>
+    public class Handler(ApplicationDbContext dbContext) : IRequestHandler<DeleteGameCommand, Result>
     {
         /// <summary>
         /// ゲーム削除処理を実行

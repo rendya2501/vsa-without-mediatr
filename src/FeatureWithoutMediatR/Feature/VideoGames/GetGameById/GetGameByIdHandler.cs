@@ -8,7 +8,7 @@ namespace FeatureWithoutMediatR.Feature.VideoGames.GetGameById;
 /// <summary>
 /// クエリハンドラ（詳細取得処理実行）
 /// </summary>
-internal sealed class GetGameByIdHandler(VideoGameDbContext dbContext)
+internal sealed class GetGameByIdHandler(ApplicationDbContext dbContext)
     : IQueryHandler<GetGameByIdQuery, GetGameByIdResponse>
 {
     /// <summary>

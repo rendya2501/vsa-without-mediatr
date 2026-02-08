@@ -8,7 +8,7 @@ namespace FeatureWithoutMediatR.Feature.VideoGames.CreateGame;
 /// <summary>
 /// コマンドハンドラ（ビジネスロジック実行）
 /// </summary>
-internal sealed class Handler(VideoGameDbContext dbContext)
+internal sealed class Handler(ApplicationDbContext dbContext)
     : ICommandHandler<CreateGameCommand, CreateGameResponse>
 {
     /// <summary>

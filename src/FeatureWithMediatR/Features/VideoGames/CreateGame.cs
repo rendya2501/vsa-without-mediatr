@@ -88,7 +88,7 @@ public static class CreateGame
     /// <summary>
     /// コマンドハンドラ（ビジネスロジック実行）
     /// </summary>
-    public class Handler(VideoGameDbContext dbContext)
+    public class Handler(ApplicationDbContext dbContext)
         : IRequestHandler<CreateGameCommand, Result<CreateGameResponse>>
     {
         /// <summary>

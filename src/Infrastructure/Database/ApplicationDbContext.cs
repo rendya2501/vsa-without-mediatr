@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Database;
 
-public class VideoGameDbContext(DbContextOptions<VideoGameDbContext> options) : DbContext(options)
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {
     public DbSet<VideoGame> VideoGames => Set<VideoGame>();
 
@@ -12,13 +12,13 @@ public class VideoGameDbContext(DbContextOptions<VideoGameDbContext> options) : 
         base.OnModelCreating(modelBuilder);
 
         modelBuilder.Entity<VideoGame>().HasData(
-              new VideoGame
-              {
-                  Id = 1,
-                  Title = "The Legend of Zelda: Breath of the Wild",
-                  Genre = "Action",
-                  ReleaseYear = 2017
-              },
+            new VideoGame
+            {
+                Id = 1,
+                Title = "The Legend of Zelda: Breath of the Wild",
+                Genre = "Action",
+                ReleaseYear = 2017
+            },
             new VideoGame
             {
                 Id = 2,

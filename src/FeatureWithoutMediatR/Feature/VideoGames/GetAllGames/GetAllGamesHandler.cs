@@ -8,7 +8,7 @@ namespace FeatureWithoutMediatR.Feature.VideoGames.GetAllGames;
 /// <summary>
 /// クエリハンドラ（一覧取得処理実行）
 /// </summary>
-internal sealed class GetAllGamesHandler(VideoGameDbContext dbContext)
+internal sealed class GetAllGamesHandler(ApplicationDbContext dbContext)
     : IQueryHandler<GetAllGamesQuery, IEnumerable<GetAllGamesResponse>>
 {
     /// <summary>
