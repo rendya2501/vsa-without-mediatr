@@ -1,247 +1,298 @@
-# VideoGameApiVsa
+# 🎮 Video Game API - Vertical Slice Architecture
 
-ビデオゲーム管理用のRESTful API。  
-垂直スライスアーキテクチャとCQRSパターンを採用したASP.NET Core 10.0アプリケーション。  
+[![.NET](https://img.shields.io/badge/.NET-10.0-512BD4)](https://dotnet.microsoft.com/)
+[![C#](https://img.shields.io/badge/C%23-12.0-239120)](https://docs.microsoft.com/en-us/dotnet/csharp/)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
+**MediatR あり・なし両方の実装を比較できる、Vertical Slice Architecture のリファレンス実装**  
+
+このプロジェクトは、ビデオゲーム管理 API を題材に、Clean Architecture と Vertical Slice Architecture を組み合わせた実装例を提供します。  
+特徴的なのは、**MediatR を使用する実装と使用しない実装を同一リポジトリで並行して提供**している点です。  
+
+---
 
 ## 📋 目次
 
-- [概要](#概要)
-- [技術スタック](#技術スタック)
-- [アーキテクチャ](#アーキテクチャ)
-- [機能](#機能)
-- [セットアップ](#セットアップ)
-- [実行方法](#実行方法)
-- [API エンドポイント](#api-エンドポイント)
-- [テスト](#テスト)
-- [プロジェクト構成](#プロジェクト構成)
-- [開発ガイドライン](#開発ガイドライン)
+- [特徴](#-特徴)
+- [アーキテクチャ](#-アーキテクチャ)
+- [技術スタック](#-技術スタック)
+- [クイックスタート](#-クイックスタート)
+- [プロジェクト構成](#-プロジェクト構成)
+- [API エンドポイント](#-api-エンドポイント)
+- [主要な設計パターン](#-主要な設計パターン)
+- [MediatR vs 自作実装の比較](#-mediatr-vs-自作実装の比較)
+- [開発ガイド](#-開発ガイド)
+- [テスト](#-テスト)
+- [デプロイ](#-デプロイ)
+- [ライセンス](#-ライセンス)
 
-## 概要
+---
 
-VideoGameApiVsaは、ビデオゲーム情報を管理するためのRESTful APIです。以下の特徴があります：
+## ✨ 特徴
 
-- **垂直スライスアーキテクチャ**: 機能ごとにファイルを集約し、保守性を向上
-- **CQRSパターン**: MediatRを使用したCommand/Query分離
-- **自動バリデーション**: FluentValidationによる入力検証
-- **構造化ログ**: Serilogによる詳細なリクエスト/レスポンス記録
-- **構造化されたエラーハンドリング**: RFC 7807準拠のProblemDetails形式
-- **包括的なテスト**: xUnitとFluentAssertionsによるテストスイート
+### 🎯 このプロジェクトで学べること
 
-## 技術スタック
+- ✅ **Vertical Slice Architecture** の実践的な実装
+- ✅ **Result パターン** による例外を使わないエラーハンドリング
+- ✅ **CQRS パターン** (Command Query Responsibility Segregation)
+- ✅ **MediatR あり・なし両方の実装** を比較できる
+- ✅ **FluentValidation** による宣言的なバリデーション
+- ✅ **Serilog** を使った構造化ログ
+- ✅ **Carter** による Minimal API の整理
+- ✅ **OpenAPI/Scalar** による自動ドキュメント生成
 
-### フレームワーク・ライブラリ
+### 🚀 プロダクションレディな機能
 
-- **.NET 10.0**: 最新の.NETプラットフォーム
-- **ASP.NET Core**: Web APIフレームワーク
-- **Carter 10.0.0**: Minimal APIの拡張ライブラリ
-- **MediatR 14.0.0**: CQRSパターン実装
-- **FluentValidation 12.1.1**: バリデーションライブラリ
-- **Entity Framework Core 10.0.1**: ORM
-- **Serilog 4.3.0**: 構造化ログライブラリ
-- **Scalar.AspNetCore 2.11.10**: API ドキュメントUI
+- 🔐 RFC 7807 準拠の ProblemDetails エラーレスポンス
+- 📝 構造化ログ（Serilog + ファイル/コンソール出力）
+- 🎨 環境別設定（Development / Production）
+- 🗄️ InMemory / SQL Server データベースの切り替え
+- 🔄 自動バリデーション（Pipeline Behavior / Decorator パターン）
+- 📊 OpenAPI ドキュメント自動生成
 
-### データベース
+---
 
-- **Entity Framework Core InMemory**: 開発・テスト用インメモリデータベース
+## 🏗️ アーキテクチャ
 
-### テスト
+このプロジェクトは **Vertical Slice Architecture** と **Clean Architecture** を組み合わせた構成になっています。
 
-- **xUnit 2.9.3**: テストフレームワーク
-- **FluentAssertions 8.8.0**: アサーションライブラリ
-- **Microsoft.AspNetCore.Mvc.Testing**: 統合テスト用
-
-## アーキテクチャ
-
-### 垂直スライスアーキテクチャ
-
-各機能は1つのファイルに集約され、以下の要素を含みます：
+### レイヤー構成
 
 ```txt
-Features/
-  VideoGames/
-    CreateGame.cs      # Request, Command, Validator, Handler, Endpoint
-    GetAllGames.cs     # Query, Handler, Endpoint
-    GetGameById.cs     # Query, Handler, Endpoint
-    UpdateGame.cs      # Request, Command, Validator, Handler, Endpoint
-    DeleteGame.cs      # Command, Handler, Endpoint
-    VideoGameModule.cs # ルーティング定義
+┌─────────────────────────────────────────────────────────────┐
+│                         Web.Api                              │
+│  (Presentation Layer - Minimal API + Carter)                │
+│  - Endpoints: HTTP リクエスト/レスポンスの変換              │
+│  - Exception Handlers: グローバルエラーハンドリング          │
+└─────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│              Feature (Application Layer)                     │
+│  ┌──────────────────────┐  ┌──────────────────────┐         │
+│  │  FeatureWithMediatR  │  │FeatureWithoutMediatR │         │
+│  │  - Commands/Queries  │  │  - Commands/Queries  │         │
+│  │  - Handlers          │  │  - Handlers          │         │
+│  │  - Validators        │  │  - Validators        │         │
+│  │  - Pipeline Behavior │  │  - Decorators        │         │
+│  └──────────────────────┘  └──────────────────────┘         │
+└─────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│                    Infrastructure                            │
+│  - Database: DbContext, Migrations, Seeders                 │
+└─────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│                        Domain                                │
+│  - Entities: VideoGame                                      │
+│  - Errors: VideoGameErrors                                  │
+│  - Validation Rules: VideoGameValidationRules               │
+└─────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│                     DomainKernel                             │
+│  - Result Pattern: Result<T>, Error, ValidationError        │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-### 処理フロー
+### Vertical Slice とは？
+
+従来の**レイヤードアーキテクチャ**（Controller → Service → Repository）では、1つの機能が複数のレイヤーに分散します。
+
+**Vertical Slice Architecture** では、1つの機能に関連するすべてのコード（リクエスト・バリデーション・ロジック・レスポンス）を **1つのファイルまたはフォルダにまとめます**。
 
 ```txt
-HTTP Request
-    ↓
-Endpoint (HTTP層)
-    ↓
-Command/Query (MediatR)
-    ↓
-LoggingBehavior (構造化ログ記録)
-    ↓
-ValidationBehavior (FluentValidation)
-    ↓
-Handler (ビジネスロジック)
-    ↓
-DbContext (データアクセス)
-    ↓
-Response (HTTP層)
+FeatureWithMediatR/
+└── Features/
+    └── VideoGames/
+        ├── CreateGame.cs      ← Command, Validator, Handler がすべて含まれる
+        ├── GetAllGames.cs
+        ├── GetGameById.cs
+        ├── UpdateGame.cs
+        └── DeleteGame.cs
 ```
 
-### 設計原則
+**メリット:**
 
-1. **関心の分離**: Request/Command/Responseを分離し、API契約と内部実装を独立
-2. **単一責任**: 各クラスは1つの責任のみを持つ
-3. **依存性逆転**: インターフェース経由で依存関係を管理
-4. **テスト容易性**: 依存性注入により、テスト可能な設計
+- 機能追加・変更時に1ファイルを見るだけで完結
+- 不要なコードの削除が容易
+- チーム開発での競合が減少
 
-### MediatR Pipeline Behaviors
+---
 
-すべてのリクエストに対して自動的に実行される横断的関心事：
+## 🛠️ 技術スタック
 
-#### LoggingBehavior
+| カテゴリ | 技術 | バージョン | 用途 |
+| - | - | - |
+| **フレームワーク** | .NET | 10.0 | ランタイム |
+| **言語** | C# | 12.0 | プログラミング言語 |
+| **Web API** | ASP.NET Core Minimal API | 10.0 | HTTP エンドポイント |
+| **API 整理** | Carter | 10.0 | Minimal API のモジュール化 |
+| **メディエーター** | MediatR | 14.0 | CQRS パターン実装（オプション） |
+| **バリデーション** | FluentValidation | 12.1 | 宣言的バリデーション |
+| **ORM** | Entity Framework Core | 10.0 | データアクセス |
+| **データベース** | InMemory / SQL Server | - | 開発・本番環境 |
+| **ロギング** | Serilog | 4.3 | 構造化ログ |
+| **依存性注入支援** | Scrutor | 7.0 | アセンブリスキャン・Decorator登録 |
+| **API ドキュメント** | Scalar | 2.12 | OpenAPI UI |
 
-- リクエスト/レスポンスの構造化ログ記録
-- 実行時間の計測
-- エラー発生時の詳細ログ
-- リクエスト単位でのGUID追跡
+---
 
-```csharp
-[14:23:45 INF] Handling CreateGameCommand [a3f2b1c8] {@Request}
-[14:23:45 INF] Handled CreateGameCommand [a3f2b1c8] in 45ms {@Response}
-```
-
-#### ValidationBehavior
-
-- FluentValidationの自動実行
-- バリデーションエラーの統一的な処理
-- ProblemDetails形式での返却
-
-## 機能
-
-### VideoGames API
-
-ビデオゲーム情報のCRUD操作を提供：
-
-- **GET /api/games**: 全ゲーム一覧取得
-- **GET /api/games/{id}**: 特定ゲームの詳細取得
-- **POST /api/games**: 新規ゲーム作成
-- **PUT /api/games/{id}**: ゲーム情報更新
-- **DELETE /api/games/{id}**: ゲーム削除
-
-### データモデル
-
-```csharp
-public class VideoGame
-{
-    public int Id { get; set; }
-    public required string Title { get; set; }
-    public required string Genre { get; set; }
-    public required int ReleaseYear { get; set; }
-}
-```
-
-### バリデーションルール
-
-- **Title**: 必須、最大100文字
-- **Genre**: 必須、最大50文字
-- **ReleaseYear**: 1950年から現在年まで
-
-## セットアップ
+## 🚀 クイックスタート
 
 ### 前提条件
 
-- [.NET 10.0 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
-- Visual Studio 2026 / Visual Studio Code / JetBrains Rider
+- [.NET 10.0 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) 以上
+- （オプション）SQL Server（本番環境用）
 
-### インストール手順
-
-1. リポジトリをクローン
+### インストールと実行
 
 ```bash
-git clone <repository-url>
-cd VideoGameApiVsa
-```
+# 1. リポジトリをクローン
+git clone https://github.com/yourusername/video-game-api-vsa.git
+cd video-game-api-vsa
 
-2. 依存パッケージを復元
-
-```bash
+# 2. 依存関係の復元
 dotnet restore
-```
 
-3. プロジェクトをビルド
-
-```bash
-dotnet build
-```
-
-## 実行方法
-
-### 開発環境での実行
-
-```bash
-cd VideoGameApiVsa
+# 3. アプリケーションの実行
+cd src/Web.Api
 dotnet run
+
+# 4. ブラウザで開く
+# Scalar UI: https://localhost:7212/scalar/v1
+# Swagger UI: https://localhost:7212/openapi/v1.json
 ```
 
-アプリケーションは以下のURLで起動します：
+### 初回起動時の動作
 
-- **HTTP**: `http://localhost:5091`
-- **HTTPS**: `https://localhost:7212`
+1. InMemory データベースが自動作成される
+2. シードデータ（5件のゲーム）が自動投入される
+3. Scalar UI で API ドキュメントが閲覧可能
 
-### API ドキュメント
+---
 
-開発環境では、以下のURLでAPIドキュメントにアクセスできます：
+## 📁 プロジェクト構成
 
-- **Scalar UI**: `https://localhost:7212/scalar/v1`
-- **OpenAPI JSON**: `https://localhost:7212/openapi/v1.json`
-
-### ログ出力
-
-アプリケーション実行時、以下の場所にログが出力されます：
-
-- **コンソール**: 標準出力にリアルタイム表示
-- **ファイル**: `logs/` ディレクトリ
-  - 本番環境: `logs/app-YYYYMMDD.log`
-  - 開発環境: `logs/dev-YYYYMMDD.log`
-
-ログは日次でローテーションされ、開発環境では7日間保持されます。
-
-## API エンドポイント
-
-### VideoGames
-
-#### 全ゲーム一覧取得
-
-```http
-GET /api/games
+```txt
+src/
+├── DomainKernel/                # 共有カーネル
+│   ├── Result.cs               # Result パターンの実装
+│   ├── Error.cs                # エラー情報の定義
+│   ├── ErrorType.cs            # エラー種別（HTTP ステータスへマッピング）
+│   └── ValidationError.cs      # バリデーションエラー集約
+│
+├── Domain/                      # ドメイン層
+│   └── VideoGame/
+│       ├── VideoGame.cs        # エンティティ
+│       ├── VideoGameErrors.cs  # ドメインエラー定義
+│       └── VideoGameValidationRules.cs  # バリデーション定数
+│
+├── Infrastructure/              # インフラ層
+│   ├── Database/
+│   │   ├── ApplicationDbContext.cs      # EF Core DbContext
+│   │   └── Seeding/
+│   │       ├── IDbSeeder.cs
+│   │       └── ApplicationDbSeeder.cs
+│   └── DependencyInjection.cs  # DI 設定
+│
+├── FeatureShared/               # Feature 層共通コード
+│   ├── Messaging/              # CQRS インターフェース
+│   │   ├── ICommand.cs
+│   │   ├── ICommandHandler.cs
+│   │   ├── IQuery.cs
+│   │   └── IQueryHandler.cs
+│   ├── Extensions/
+│   │   ├── ResultExtensions.cs      # Result → Match パターン
+│   │   └── ResultHttpExtensions.cs  # Result → HTTP 変換
+│   └── Infrastructure/
+│       └── CustomResults.cs    # ProblemDetails 生成
+│
+├── FeatureWithMediatR/          # MediatR 使用版
+│   ├── Behaviors/
+│   │   ├── LoggingBehavior.cs       # ログ記録
+│   │   └── ValidationBehavior.cs    # バリデーション
+│   ├── Features/
+│   │   └── VideoGames/
+│   │       ├── CreateGame.cs   # Command + Validator + Handler
+│   │       ├── GetAllGames.cs
+│   │       ├── GetGameById.cs
+│   │       ├── UpdateGame.cs
+│   │       └── DeleteGame.cs
+│   └── DependencyInjection.cs
+│
+├── FeatureWithoutMediatR/       # 自作実装版
+│   ├── Behaviors/
+│   │   ├── LoggingDecorator.cs      # Decorator パターン
+│   │   └── ValidationDecorator.cs
+│   ├── Feature/
+│   │   └── VideoGames/
+│   │       ├── CreateGame/
+│   │       │   ├── CreateGameCommand.cs
+│   │       │   ├── CreateGameHandler.cs
+│   │       │   └── CreateGameResponse.cs
+│   │       ├── GetAllGames/
+│   │       └── ... (同様の構造)
+│   └── DependencyInjection.cs
+│
+└── Web.Api/                     # プレゼンテーション層
+    ├── Endpoints/
+    │   ├── WithMediatR/        # MediatR 版エンドポイント
+    │   └── WithoutMediatR/     # 自作版エンドポイント
+    ├── ExceptionHandlers/
+    │   ├── GlobalExceptionHandler.cs
+    │   └── ValidationExceptionHandler.cs
+    ├── DependencyInjection.cs
+    ├── Program.cs
+    └── appsettings.json
 ```
 
-**レスポンス例:**
+---
 
-```json
-[
-  {
-    "id": 1,
-    "title": "The Legend of Zelda: Breath of the Wild",
-    "genre": "Action",
-    "releaseYear": 2017
-  },
-  {
-    "id": 2,
-    "title": "The Witcher 3: Wild Hunt",
-    "genre": "RPG",
-    "releaseYear": 2015
-  }
-]
+## 🌐 API エンドポイント
+
+### MediatR 版
+
+| メソッド | パス | 説明 |
+| - | - | - |
+| `GET` | `/api/with-mediatr/games` | 全ゲーム一覧取得 |
+| `GET` | `/api/with-mediatr/games/{id}` | ID指定ゲーム取得 |
+| `POST` | `/api/with-mediatr/games` | 新規ゲーム作成 |
+| `PUT` | `/api/with-mediatr/games/{id}` | ゲーム更新 |
+| `DELETE` | `/api/with-mediatr/games/{id}` | ゲーム削除 |
+
+### 自作実装版
+
+| メソッド | パス | 説明 |
+| - | - | - |
+| `GET` | `/api/without-mediatr/games` | 全ゲーム一覧取得 |
+| `GET` | `/api/without-mediatr/games/{id}` | ID指定ゲーム取得 |
+| `POST` | `/api/without-mediatr/games` | 新規ゲーム作成 |
+| `PUT` | `/api/without-mediatr/games/{id}` | ゲーム更新 |
+| `DELETE` | `/api/without-mediatr/games/{id}` | ゲーム削除 |
+
+### リクエスト例
+
+```bash
+# ゲーム作成
+curl -X POST https://localhost:7212/api/with-mediatr/games \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Elden Ring",
+    "genre": "Action RPG",
+    "releaseYear": 2022
+  }'
+
+# 全ゲーム取得
+curl https://localhost:7212/api/with-mediatr/games
+
+# ID指定取得
+curl https://localhost:7212/api/with-mediatr/games/1
 ```
 
-#### ゲーム詳細取得
+### レスポンス例
 
-```http
-GET /api/games/{id}
-```
-
-**レスポンス例:**
+**成功時 (200 OK):**
 
 ```json
 {
@@ -252,315 +303,301 @@ GET /api/games/{id}
 }
 ```
 
-**エラー:**
-
-- `404 Not Found`: 指定されたIDのゲームが存在しない場合
-
-#### ゲーム作成
-
-```http
-POST /api/games
-Content-Type: application/json
-
-{
-  "title": "New Game",
-  "genre": "Action",
-  "releaseYear": 2023
-}
-```
-
-**レスポンス:**
-
-- `201 Created`: 作成成功（Locationヘッダに作成されたリソースのURLを含む）
-- `400 Bad Request`: バリデーションエラー
-
-**バリデーションエラーレスポンス例:**
+**エラー時 (400 Bad Request):**
 
 ```json
 {
-  "type": "https://httpstatuses.com/400",
-  "title": "Validation failed",
+  "type": "https://tools.ietf.org/html/rfc7231#section-6.5.1",
+  "title": "Validation.General",
   "status": 400,
-  "detail": "One or more validation errors occurred.",
-  "instance": "/api/games",
-  "errors": {
-    "Title": ["'Title' must not be empty."],
-    "ReleaseYear": ["'Release Year' must be between 1950 and 2026 (inclusive)."]
+  "detail": "One or more validation errors occurred",
+  "errors": [
+    {
+      "code": "NotEmptyValidator",
+      "description": "'Title' must not be empty."
+    }
+  ]
+}
+```
+
+---
+
+## 🎨 主要な設計パターン
+
+### 1. Result パターン
+
+例外を使わずにエラーを表現するパターン。
+
+```csharp
+// 成功
+Result<VideoGame> result = Result.Success(videoGame);
+
+// 失敗
+Result<VideoGame> result = Result.Failure<VideoGame>(
+    VideoGameErrors.NotFound(id)
+);
+
+// パターンマッチング
+return result.Match(
+    onSuccess: game => Results.Ok(game),
+    onFailure: error => CustomResults.Problem(error)
+);
+```
+
+**メリット:**
+
+- 例外のパフォーマンスコストを回避
+- エラーハンドリングが型安全
+- 関数型プログラミングのベストプラクティス
+
+### 2. CQRS (Command Query Responsibility Segregation)
+
+コマンド（書き込み）とクエリ（読み取り）を分離。
+
+```csharp
+// Command: データを変更する
+public record CreateGameCommand(string Title, string Genre, int ReleaseYear)
+    : ICommand<CreateGameResponse>;
+
+// Query: データを取得する
+public record GetGameByIdQuery(int Id)
+    : IQuery<GetGameByIdResponse>;
+```
+
+### 3. Vertical Slice Architecture
+
+1機能 = 1ファイルにすべてを集約。
+
+```csharp
+// CreateGame.cs にすべて含まれる
+public static class CreateGame
+{
+    public record CreateGameCommand(...) : IRequest<Result<Response>>;
+    public record CreateGameResponse(...);
+    public class Validator : AbstractValidator<CreateGameCommand> { }
+    public class Handler : IRequestHandler<CreateGameCommand, Result<Response>> { }
+}
+```
+
+### 4. Decorator パターン (Without MediatR)
+
+MediatR の Pipeline Behavior と同等の機能を Decorator で実現。
+
+```csharp
+// Scrutor による自動 Decorator 登録
+services.Decorate(typeof(ICommandHandler<,>), typeof(ValidationDecorator.CommandHandler<,>));
+services.Decorate(typeof(ICommandHandler<,>), typeof(LoggingDecorator.CommandHandler<,>));
+```
+
+**実行順序:**
+
+```txt
+Endpoint
+  → LoggingDecorator
+    → ValidationDecorator
+      → 実際の Handler
+```
+
+---
+
+## 🔄 MediatR vs 自作実装の比較
+
+| 観点 | MediatR 版 | 自作実装版 |
+| - | - | - |
+| **依存関係** | MediatR NuGet 必須 | Scrutor のみ |
+| **パイプライン** | `IPipelineBehavior` | Decorator パターン |
+| **DI 登録** | `AddMediatR()` で自動 | Scrutor で自動スキャン + Decorator |
+| **エラーハンドリング** | `ValidationException` をスロー | `Result.Failure` を返す |
+| **コード量** | 少ない（MediatR が抽象化） | やや多い（自前実装） |
+| **学習コスト** | MediatR の理解が必要 | CQRS パターンのみ |
+| **柔軟性** | MediatR の制約あり | 完全にカスタマイズ可能 |
+| **パフォーマンス** | リフレクションのオーバーヘッド | やや高速（直接呼び出し） |
+
+### 推奨する使い分け
+
+- **MediatR を選ぶべき場合:**
+  - チームが MediatR に慣れている
+  - 迅速な開発を優先
+  - 標準的なパターンを採用したい
+
+- **自作実装を選ぶべき場合:**
+  - 外部依存を最小化したい
+  - カスタマイズの自由度が必要
+  - パフォーマンスを重視
+
+---
+
+## 👨‍💻 開発ガイド
+
+### 新機能の追加方法
+
+#### ステップ1: Command/Query の定義
+
+```csharp
+// FeatureWithMediatR/Features/VideoGames/ArchiveGame.cs
+public static class ArchiveGame
+{
+    public record ArchiveGameCommand(int Id) : IRequest<Result>;
+}
+```
+
+#### ステップ2: Validator の実装
+
+```csharp
+public class Validator : AbstractValidator<ArchiveGameCommand>
+{
+    public Validator()
+    {
+        RuleFor(x => x.Id).GreaterThan(0);
+    }
+}
+```
+
+#### ステップ3: Handler の実装
+
+```csharp
+public class Handler(ApplicationDbContext dbContext)
+    : IRequestHandler<ArchiveGameCommand, Result>
+{
+    public async Task<Result> Handle(ArchiveGameCommand command, CancellationToken ct)
+    {
+        var game = await dbContext.VideoGames.FindAsync([command.Id], ct);
+        if (game is null) return VideoGameErrors.NotFound(command.Id);
+        
+        game.IsArchived = true;
+        await dbContext.SaveChangesAsync(ct);
+        
+        return Result.Success();
+    }
+}
+```
+
+#### ステップ4: Endpoint の追加
+
+```csharp
+// Web.Api/Endpoints/WithMediatR/VideoGames/ArchiveGameEndpoint.cs
+public sealed class ArchiveGameEndpoint : ICarterModule
+{
+    public void AddRoutes(IEndpointRouteBuilder app)
+    {
+        app.MapWithMediatRGamesApi()
+            .MapPost("/{id:int}/archive", async (ISender sender, int id, CancellationToken ct) =>
+            {
+                var result = await sender.Send(new ArchiveGameCommand(id), ct);
+                return result.ToNoContent();
+            })
+            .WithName("ArchiveGame")
+            .Produces(StatusCodes.Status204NoContent);
+    }
+}
+```
+
+### 環境設定のカスタマイズ
+
+#### appsettings.json (本番環境)
+
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=prod-server;Database=GameDB;User Id=sa;Password=***;"
+  },
+  "Serilog": {
+    "MinimumLevel": {
+      "Default": "Warning"
+    }
   }
 }
 ```
 
-#### ゲーム更新
+---
 
-```http
-PUT /api/games/{id}
-Content-Type: application/json
+## 🧪 テスト
 
+### 単体テスト例
+
+```csharp
+public class CreateGameHandlerTests
 {
-  "title": "Updated Game Title",
-  "genre": "RPG",
-  "releaseYear": 2024
+    [Fact]
+    public async Task Handle_ValidCommand_ReturnsSuccess()
+    {
+        // Arrange
+        var dbContext = CreateInMemoryDbContext();
+        var handler = new CreateGame.Handler(dbContext);
+        var command = new CreateGame.CreateGameCommand("Elden Ring", "RPG", 2022);
+        
+        // Act
+        var result = await handler.Handle(command, CancellationToken.None);
+        
+        // Assert
+        Assert.True(result.IsSuccess);
+        Assert.Equal("Elden Ring", result.Value.Title);
+    }
 }
 ```
 
-**レスポンス:**
-
-- `200 OK`: 更新成功
-- `400 Bad Request`: バリデーションエラー
-- `404 Not Found`: 指定されたIDのゲームが存在しない場合
-
-#### ゲーム削除
-
-```http
-DELETE /api/games/{id}
-```
-
-**レスポンス:**
-
-- `204 No Content`: 削除成功
-- `404 Not Found`: 指定されたIDのゲームが存在しない場合
-
-### WeatherForecast (サンプル機能)
-
-```http
-GET /api/weather-forecast
-```
-
-5日間の天気予報データを返します（サンプル機能）。
-
-## テスト
-
-### テストの実行
+### テスト実行
 
 ```bash
 dotnet test
 ```
 
-### テストカバレッジ
+---
 
-プロジェクトには以下のテストが含まれています：
+## 🚢 デプロイ
 
-#### 単体テスト（56件）
+### Docker での実行
 
-- **CreateGameTests** (14件)
-  - 正常系: ゲーム作成成功
-  - バリデーション: Title（空、null、境界値100文字、101文字）
-  - バリデーション: Genre（空、null、境界値50文字、51文字）
-  - バリデーション: ReleaseYear（1949年、1950年、現在年、未来年）
-  - 統合: すべて有効な値
-  
-- **UpdateGameTests** (14件)
-  - 正常系: ゲーム更新成功
-  - エラー系: 存在しないゲーム
-  - バリデーション: CreateGameと同様の境界値テスト
-  
-- **DeleteGameTests** (9件)
-  - 正常系: ゲーム削除成功
-  - エラー系: 存在しないゲーム、同じゲームの二重削除
-  - エッジケース: ID=0、負のID、非常に大きなID
-  - 複数データ: 特定ゲームのみ削除、データベース整合性確認
-  
-- **GetAllGamesTests** (3件)
-  - 正常系: データ存在時の一覧取得
-  - エッジケース: データ0件時の空リスト返却
-  - パフォーマンス: 100件のデータ取得
-  
-- **GetGameByIdTests** (5件)
-  - 正常系: ゲーム詳細取得成功
-  - エラー系: 存在しないゲーム
-  - エッジケース: ID=0、負のID
-  - 複数データ: 正しいゲームのみ取得
+```dockerfile
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
+WORKDIR /app
+EXPOSE 80
 
-#### 統合テスト（11件）
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
+COPY . .
+RUN dotnet restore
+RUN dotnet publish -c Release -o /app/publish
 
-- **VideoGamesIntegrationTests** (11件)
-  - HTTP統合: 作成（201）、バリデーション失敗（400）
-  - HTTP統合: 一覧取得（200）、存在しないゲーム取得（404）
-  - E2E: 作成→取得の流れ
-  - E2E: 作成→更新→取得→削除の完全フロー
-  - エラー処理: 存在しないゲームの更新（404）、無効データでの更新（400）
-  - エラー処理: 存在しないゲームの削除（404）
-  - 並行処理: 複数ゲームの同時作成
-
-**合計: 62件のテスト**
-
-### テストの特徴
-
-- **InMemory Database**: 各テストで独立したデータベースを使用（`Guid.NewGuid().ToString()`）
-- **FluentAssertions**: 読みやすいアサーション（`Should().Be()`, `Should().NotBeNull()`）
-- **包括的なカバレッジ**: 正常系・異常系・境界値・エッジケースを網羅
-- **統合テスト**: WebApplicationFactoryによる実際のHTTPリクエストシミュレーション
-
-## プロジェクト構成
-
-```txt
-VideoGameApiVsa/
-├── Behaviors/
-│   ├── LoggingBehavior.cs         # Serilogによる構造化ログ記録
-│   └── ValidationBehavior.cs      # FluentValidation自動実行
-├── Data/
-│   └── VideoGameDbContext.cs      # Entity Framework DbContext
-├── Entities/
-│   └── VideoGame.cs               # エンティティ定義
-├── Extensions/                     # 拡張メソッド（DI設定整理）
-│   ├── DatabaseExtensions.cs      # データベース初期化・シードデータ
-│   ├── MiddlewareExtensions.cs    # ミドルウェアパイプライン設定
-│   ├── SerilogExtensions.cs       # Serilog設定
-│   └── ServiceExtensions.cs       # サービス登録
-├── Features/
-│   ├── VideoGames/                # ビデオゲーム機能
-│   │   ├── CreateGame.cs
-│   │   ├── DeleteGame.cs
-│   │   ├── GetAllGames.cs
-│   │   ├── GetGameById.cs
-│   │   ├── UpdateGame.cs
-│   │   ├── VideoGameConstants.cs # 定数定義（バリデーション、ルート名）
-│   │   └── VideoGameModule.cs
-│   └── WeatherForecast/           # サンプル機能
-│       ├── GetWeatherForecast.cs
-│       └── WeatherForecastModule.cs
-├── Properties/
-│   └── launchSettings.json
-├── Program.cs                      # アプリケーションエントリーポイント
-├── appsettings.json                # Serilog本番設定
-├── appsettings.Development.json    # Serilog開発設定
-└── VideoGameApiVsa.csproj
-
-VideoGameApiVsa.Tests/
-└── Features/
-    └── VideoGames/                 # テストクラス
-        ├── CreateGameTests.cs
-        ├── DeleteGameTests.cs
-        ├── GetAllGamesTests.cs
-        ├── GetGameByIdTests.cs
-        ├── UpdateGameTests.cs
-        └── VideoGamesIntegrationTests.cs
+FROM base AS final
+WORKDIR /app
+COPY --from=build /app/publish .
+ENTRYPOINT ["dotnet", "Web.Api.dll"]
 ```
 
-## 開発ガイドライン
-
-### 新機能の追加
-
-1. **Featuresフォルダに新しいファイルを作成**
-
-```csharp
-public static class NewFeature
-{
-    // Request DTO
-    public record NewFeatureRequest(...);
-    
-    // Command/Query
-    public record NewFeatureCommand(...) : IRequest<NewFeatureResponse>;
-    
-    // Response DTO
-    public record NewFeatureResponse(...);
-    
-    // Validator (必要に応じて)
-    public class Validator : AbstractValidator<NewFeatureCommand> { }
-    
-    // Handler
-    public class Handler(...) : IRequestHandler<NewFeatureCommand, NewFeatureResponse> { }
-    
-    // Endpoint
-    public static async Task<IResult> Endpoint(...) { }
-}
+```bash
+docker build -t video-game-api .
+docker run -p 8080:80 video-game-api
 ```
 
-2. **Moduleにルートを追加**
+### Azure App Service へのデプロイ
 
-```csharp
-group.MapPost("/new-feature", NewFeature.Endpoint)
-    .WithName("NewFeature")
-    .WithDescription("Description")
-    .Produces<NewFeature.NewFeatureResponse>(StatusCodes.Status200OK);
+```bash
+az webapp up --name my-video-game-api --runtime "DOTNET:10.0"
 ```
 
-3. **テストを追加**
+---
 
-```csharp
-public class NewFeatureTests
-{
-    [Fact]
-    public async Task Handle_ShouldReturnExpectedResult_WhenValidInput()
-    {
-        // Arrange
-        var options = new DbContextOptionsBuilder<VideoGameDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-            .Options;
-        
-        // Act & Assert
-    }
-}
-```
+## 📚 参考資料
 
-### コーディング規約
+- [Vertical Slice Architecture - Jimmy Bogard](https://www.jimmybogard.com/vertical-slice-architecture/)
+- [Result Pattern - Milan Jovanović](https://www.milanjovanovic.tech/blog/functional-error-handling-in-dotnet-with-the-result-pattern)
+- [CQRS Pattern - Microsoft](https://docs.microsoft.com/en-us/azure/architecture/patterns/cqrs)
+- [MediatR Documentation](https://github.com/jbogard/MediatR)
+- [FluentValidation Documentation](https://docs.fluentvalidation.net/)
 
-- **命名規則**: PascalCase（クラス、メソッド）、camelCase（ローカル変数）
-- **XMLコメント**: すべての公開メンバーにXMLコメントを追加
-- **null安全性**: nullable参照型を有効化し、適切にnullチェック
-- **非同期処理**: I/O操作は必ずasync/awaitを使用
+---
 
-### エラーハンドリング
+## 📄 ライセンス
 
-- **バリデーションエラー**: FluentValidationが自動的に検出し、400 Bad Requestを返却
-- **未処理例外**: グローバル例外ハンドラでキャッチし、適切なHTTPステータスコードを返却
-- **ProblemDetails**: RFC 7807準拠のエラーレスポンス形式
+このプロジェクトは [MIT ライセンス](LICENSE) の下でライセンスされています。
 
-### ログ設定のカスタマイズ
+---
 
-`appsettings.json`または`appsettings.Development.json`でログレベルを調整：
+## 🙏 謝辞
 
-```json
-{
-  "Serilog": {
-    "MinimumLevel": {
-      "Default": "Information",
-      "Override": {
-        "VideoGameApiVsa.Behaviors.LoggingBehavior": "Debug"
-      }
-    }
-  }
-}
-```
+このプロジェクトは以下の素晴らしいリソースとコミュニティに影響を受けています:
 
-- **Debug**: 詳細なリクエスト/レスポンスを記録
-- **Information**: 通常の動作ログ
-- **Warning**: 警告レベル以上のみ記録
-
-### データベースの変更
-
-現在はInMemoryデータベースを使用していますが、以下のように変更可能：
-
-**PostgreSQLへの変更例:**
-
-```csharp
-// VideoGameApiVsa/Extensions/ServiceExtensions.cs
-services.AddDbContext<VideoGameDbContext>(options =>
-    options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
-```
-
-**SQL Serverへの変更例:**
-
-```csharp
-services.AddDbContext<VideoGameDbContext>(options =>
-    options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
-```
-
-## ライセンス
-
-このプロジェクトはMITライセンスの下で公開されています。
-
-## 参考資料
-
-- [垂直スライスアーキテクチャ](https://www.jimmybogard.com/vertical-slice-architecture/)
-- [MediatR公式ドキュメント](https://github.com/jbogard/MediatR)
-- [FluentValidation公式ドキュメント](https://docs.fluentvalidation.net/)
-- [Serilog公式ドキュメント](https://serilog.net/)
-- [Carter公式ドキュメント](https://github.com/CarterCommunity/Carter)
-- [Build a CRUD App with Vertical Slice Architecture in .NET 9](https://youtu.be/dnvi0B76ekg?si=nV0QWSmQTjlQeQ8H)
-- [The Cleanest .NET Web API with Vertical Slice Architecture is here!](https://youtu.be/1jYh3j9bGxA?si=U7MWXHkqQ1Kf0b0N)
-- [How to Protect Your .NET API with FluentValidation (The Right Way!))](https://youtu.be/u42B4azsNho?si=RGp-uFcBqc7FhqBj)  
-
-- [YouTube_I Removed MediatR – Building Your Own CQRS Handlers in .NET](https://www.youtube.com/watch?v=j1OUToRyVHc)  
-- [YouTube_Building Your Own CQRS Pipeline With Decorators (Dropped MediatR!)](https://www.youtube.com/watch?v=gsluG8NdCfw)
-- [YouTube_Building a Custom Domain Events Dispatcher in .NET](https://www.youtube.com/watch?v=PPGLrllJs_U)
+- [Jimmy Bogard](https://www.jimmybogard.com/) - Vertical Slice Architecture の提唱
+- [Milan Jovanović](https://www.milanjovanovic.tech/) - Clean Architecture の教育的コンテンツ
+- [Jason Taylor](https://github.com/jasontaylordev) - Clean Architecture テンプレート
