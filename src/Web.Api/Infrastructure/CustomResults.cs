@@ -1,5 +1,4 @@
 ﻿using DomainKernel;
-using Microsoft.AspNetCore.Http;
 
 namespace FeatureShared.Infrastructure;
 

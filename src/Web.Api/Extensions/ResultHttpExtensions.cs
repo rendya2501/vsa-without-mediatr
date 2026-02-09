@@ -1,6 +1,5 @@
 ﻿using DomainKernel;
 using FeatureShared.Infrastructure;
-using Microsoft.AspNetCore.Http;
 
 namespace FeatureShared.Extensions;
 
