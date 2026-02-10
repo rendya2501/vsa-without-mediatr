@@ -15,7 +15,9 @@ public static class ResultHttpExtensions
     /// <param name="result"></param>
     /// <returns></returns>
     public static IResult ToOk<T>(this Result<T> result) =>
-        result.Match(Results.Ok, CustomResults.Problem);
+        result.Match(
+            Results.Ok,
+            CustomResults.Problem);
 
     /// <summary>
     /// 201 Created At Route
@@ -28,18 +30,24 @@ public static class ResultHttpExtensions
     public static IResult ToCreatedAtRoute<T>(
         this Result<T> result,
         string routeName,
-        Func<T, object> routeValuesSelector) =>
+        Func<T, object> routeValuesSelector,
+        Func<T, object>? responseSelector = null) =>
             result.Match(
-                value => Results.CreatedAtRoute(routeName, routeValuesSelector(value), value),
+                value => Results.CreatedAtRoute(
+                    routeName,
+                    routeValues: routeValuesSelector(value),
+                    value: responseSelector is not null ? responseSelector(value) : value),
                 CustomResults.Problem);
 
     /// <summary>
-    /// 205 No Content
+    /// 204 No Content
     /// </summary>
     /// <param name="result"></param>
     /// <returns></returns>
     public static IResult ToNoContent(this Result result) =>
-        result.Match(Results.NoContent, CustomResults.Problem);
+        result.Match(
+            Results.NoContent,
+            CustomResults.Problem);
 
     /// <summary>
     /// カスタムレスポンス
