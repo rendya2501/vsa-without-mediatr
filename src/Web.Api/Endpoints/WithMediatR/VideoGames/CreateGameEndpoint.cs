@@ -45,9 +45,11 @@ public sealed class CreateGameEndpoint : ICarterModule
                 var result = await sender.Send(command, cancellationToken);
 
                 // 201 Created + Location ヘッダ付きレスポンス
-                return result.ToCreatedAtRoute(
-                    routeName: VideoGameRouteNames.WithMediatR.GetById,
-                    routeValuesSelector: response => new { id = response.Id });
+                return result.ToResult(response =>
+                    Results.CreatedAtRoute(
+                        VideoGameRouteNames.WithMediatR.GetById,
+                        new { id = response.Id },
+                        response));
             })
             .WithName(VideoGameRouteNames.WithMediatR.Create)
             //.WithSummary("Create a new video game")

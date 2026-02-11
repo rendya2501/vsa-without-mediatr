@@ -1,94 +1,103 @@
 ﻿using DomainKernel;
-using FeatureShared.Infrastructure;
+using Web.Api.Extensions;
 
 namespace FeatureShared.Extensions;
 
 /// <summary>
-/// ResultをHTTPレスポンスに変換する拡張メソッド
+/// <see cref="Result"/> および <see cref="Result{TValue}"/> を HTTP レスポンスに変換する拡張メソッド
 /// </summary>
+/// <remarks>
+/// <para>
+/// 成功時は対応する HTTP ステータスコードのレスポンスを返し、
+/// 失敗時は <see cref="ErrorToProblemMapper"/> を通じて RFC 7807 準拠の ProblemDetails に変換します。
+/// </para>
+/// <para>
+/// <strong>使い分けの指針:</strong><br/>
+/// - レスポンスパターンが1通りに決まる場合 → <see cref="ToOk{T}"/>、<see cref="ToNoContent"/> を使用<br/>
+/// - ルート名や追加パラメータが必要な場合、または複雑なレスポンスを返す場合 → <see cref="ToResult{T}"/>、<see cref="ToResult"/> を使用
+/// </para>
+/// </remarks>
 public static class ResultHttpExtensions
 {
     /// <summary>
-    /// 200 OK
+    /// 成功時に 200 OK、失敗時に ProblemDetails を返します
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="result"></param>
-    /// <returns></returns>
+    /// <typeparam name="T">成功時の値の型</typeparam>
+    /// <param name="result">変換対象の Result</param>
+    /// <returns>200 OK または ProblemDetails を含む <see cref="IResult"/></returns>
     public static IResult ToOk<T>(this Result<T> result) =>
         result.Match(
             Results.Ok,
-            CustomResults.Problem);
+            failure => ErrorToProblemMapper.ToHttpResult(failure.Error!));
 
     /// <summary>
-    /// 201 Created At Route
+    /// 成功時に 204 No Content、失敗時に ProblemDetails を返します
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    /// <param name="result"></param>
-    /// <param name="routeName"></param>
-    /// <param name="routeValuesSelector"></param>
-    /// <returns></returns>
-    public static IResult ToCreatedAtRoute<T>(
-        this Result<T> result,
-        string routeName,
-        Func<T, object> routeValuesSelector,
-        Func<T, object>? responseSelector = null) =>
-            result.Match(
-                value => Results.CreatedAtRoute(
-                    routeName,
-                    routeValues: routeValuesSelector(value),
-                    value: responseSelector is not null ? responseSelector(value) : value),
-                CustomResults.Problem);
-
-    /// <summary>
-    /// 204 No Content
-    /// </summary>
-    /// <param name="result"></param>
-    /// <returns></returns>
+    /// <param name="result">変換対象の Result</param>
+    /// <returns>204 No Content または ProblemDetails を含む <see cref="IResult"/></returns>
     public static IResult ToNoContent(this Result result) =>
         result.Match(
             Results.NoContent,
-            CustomResults.Problem);
+            failure => ErrorToProblemMapper.ToHttpResult(failure.Error!));
 
     /// <summary>
-    /// カスタムレスポンス
+    /// 成功時に <paramref name="onSuccess"/> の結果、失敗時に ProblemDetails を返します
     /// </summary>
-    /// <typeparam name="T">返り値の型</typeparam>
-    /// <param name="result">結果オブジェクト</param>
-    /// <param name="onSuccess">成功時の処理</param>
-    /// <returns>IResult オブジェクト</returns>
+    /// <typeparam name="T">成功時の値の型</typeparam>
+    /// <param name="result">変換対象の Result</param>
+    /// <param name="onSuccess">成功時に実行するレスポンス生成処理</param>
+    /// <returns><paramref name="onSuccess"/> の結果または ProblemDetails を含む <see cref="IResult"/></returns>
     /// <remarks>
-    /// <para><strong>202 Accepted 例</strong></para>
+    /// <para>
+    /// <see cref="ToOk{T}"/> や <see cref="ToNoContent"/> で対応できない場合に使用します。
+    /// 201 Created や 202 Accepted など、呼び出し側でレスポンスを組み立てるケースが対象です。
+    /// </para>
+    /// <example>
+    /// <strong>201 Created の例</strong>
     /// <code>
-    /// public static async Task&lt;IResult&gt; Endpoint(...)
-    ///     => (await sender.Send(new StartJobCommand(id), ct))
-    ///         .ToResult(job => Results.Accepted($"/api/jobs/{job.Id}", job));
+    /// return result.ToResult(response =>
+    ///     Results.CreatedAtRoute(
+    ///         VideoGameRouteNames.WithMediatR.GetById,
+    ///         new { id = response.Id },
+    ///         response));
     /// </code>
+    /// </example>
+    /// <example>
+    /// <strong>202 Accepted の例</strong>
+    /// <code>
+    /// return result.ToResult(job =>
+    ///     Results.Accepted($"/api/jobs/{job.Id}", job));
+    /// </code>
+    /// </example>
     /// </remarks>
     public static IResult ToResult<T>(this Result<T> result, Func<T, IResult> onSuccess) =>
-        result.Match(onSuccess, CustomResults.Problem);
+        result.Match(
+            onSuccess,
+            failure => ErrorToProblemMapper.ToHttpResult(failure.Error!));
 
     /// <summary>
-    /// カスタムレスポンス
+    /// 成功時に <paramref name="onSuccess"/> の結果、失敗時に ProblemDetails を返します（値なし版）
     /// </summary>
-    /// <param name="result"></param>
-    /// <param name="onSuccess"></param>
-    /// <returns></returns>
+    /// <param name="result">変換対象の Result</param>
+    /// <param name="onSuccess">成功時に実行するレスポンス生成処理</param>
+    /// <returns><paramref name="onSuccess"/> の結果または ProblemDetails を含む <see cref="IResult"/></returns>
     /// <remarks>
-    /// <para><strong>複雑なロジック 例</strong></para>
+    /// <para>
+    /// 値を持たない <see cref="Result"/> に対して、カスタムレスポンスを返したい場合に使用します。
+    /// </para>
+    /// <example>
+    /// <strong>カスタムヘッダーを含むレスポンスの例</strong>
     /// <code>
-    /// public static async Task&lt;IResult&gt; Endpoint(ISender sender, int id, CancellationToken ct)
-    ///     => (await sender.Send(new SomeCommand(id), ct))
-    ///         .ToResult(value =>
-    ///         {
-    ///             // 複雑なロジック
-    ///             var headers = new Dictionary&lt;string, string&gt;
-    ///             {
-    ///                 ["X-Custom-Header"] = value.SomeProperty
-    ///             };
-    ///             return Results.Ok(value);
-    ///         });
+    /// return result.ToResult(() =>
+    /// {
+    ///     httpContext.Response.Headers["X-Custom-Header"] = "value";
+    ///     return Results.Ok();
+    /// });
     /// </code>
+    /// </example>
     /// </remarks>
     public static IResult ToResult(this Result result, Func<IResult> onSuccess) =>
-        result.Match(onSuccess, CustomResults.Problem);
+        result.Match(
+            onSuccess,
+            failure => ErrorToProblemMapper.ToHttpResult(failure.Error!));
 }
